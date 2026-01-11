@@ -1,1 +1,527 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clock Practice - Grade 1</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Comic Sans MS', 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 600px;
+            width: 100%;
+            padding: 40px;
+            text-align: center;
+        }
+        
+        h1 {
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+        }
+        
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 1.1em;
+        }
+        
+        .question-text {
+            font-size: 1.5em;
+            color: #333;
+            margin-bottom: 30px;
+            font-weight: bold;
+        }
+        
+        .analog-clock {
+            width: 300px;
+            height: 300px;
+            border: 10px solid #333;
+            border-radius: 50%;
+            position: relative;
+            margin: 30px auto;
+            background: white;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        
+        .clock-center {
+            width: 16px;
+            height: 16px;
+            background: #333;
+            border-radius: 50%;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 10;
+        }
+        
+        .hour-hand {
+            width: 8px;
+            height: 80px;
+            background: #333;
+            position: absolute;
+            bottom: 50%;
+            left: 50%;
+            transform-origin: bottom center;
+            border-radius: 4px 4px 0 0;
+        }
+        
+        .minute-hand {
+            width: 6px;
+            height: 120px;
+            background: #667eea;
+            position: absolute;
+            bottom: 50%;
+            left: 50%;
+            transform-origin: bottom center;
+            border-radius: 3px 3px 0 0;
+        }
+        
+        .clock-number {
+            position: absolute;
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .clock-tick {
+            position: absolute;
+            width: 2px;
+            height: 10px;
+            background: #999;
+            left: 50%;
+            transform-origin: center 150px;
+        }
+        
+        .clock-tick.major {
+            height: 20px;
+            width: 3px;
+            background: #333;
+        }
+        
+        .time-input-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            margin: 30px 0;
+            font-size: 1.5em;
+            flex-wrap: wrap;
+        }
+        
+        .time-digit-box {
+            width: 80px;
+            height: 90px;
+            border: 3px solid #667eea;
+            background: white;
+            font-size: 2.5em;
+            text-align: center;
+            border-radius: 10px;
+            font-family: monospace;
+            line-height: 90px;
+        }
+        
+        .time-digit-box.active {
+            border-color: #10b981;
+            background: #d1fae5;
+            animation: pulse 1s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        
+        .time-digit-box.filled {
+            background: #f3f4f6;
+        }
+        
+        .number-pad {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            max-width: 280px;
+            margin: 20px auto;
+        }
+        
+        .number-btn {
+            padding: 15px;
+            font-size: 1.5em;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.2s;
+        }
+        
+        .number-btn:active {
+            background: #764ba2;
+            transform: scale(0.95);
+        }
+        
+        .number-btn.backspace {
+            background: #ef4444;
+            grid-column: span 3;
+            font-size: 1.2em;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        button.action-btn {
+            flex: 1;
+            padding: 18px;
+            font-size: 1.2em;
+            font-weight: bold;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .check-btn {
+            background: #10b981;
+            color: white;
+        }
+        
+        .check-btn:hover {
+            background: #059669;
+            transform: translateY(-2px);
+        }
+        
+        .next-btn {
+            background: #667eea;
+            color: white;
+        }
+        
+        .next-btn:hover {
+            background: #764ba2;
+            transform: translateY(-2px);
+        }
+        
+        .skip-btn {
+            background: #f59e0b;
+            color: white;
+        }
+        
+        .skip-btn:hover {
+            background: #d97706;
+            transform: translateY(-2px);
+        }
+        
+        .feedback {
+            text-align: center;
+            font-size: 1.5em;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            font-weight: bold;
+        }
+        
+        .feedback.correct {
+            background: #d1fae5;
+            color: #065f46;
+        }
+        
+        .feedback.incorrect {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+        
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            background: #f3f4f6;
+            padding: 20px;
+            border-radius: 10px;
+        }
+        
+        .stat-item {
+            text-align: center;
+        }
+        
+        .stat-number {
+            font-size: 2em;
+            font-weight: bold;
+            color: #667eea;
+        }
+        
+        .stat-label {
+            color: #666;
+            margin-top: 5px;
+        }
+        
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px;
+            }
+            
+            h1 {
+                font-size: 2em;
+            }
+            
+            .analog-clock {
+                width: 250px;
+                height: 250px;
+            }
+            
+            .hour-hand {
+                height: 65px;
+            }
+            
+            .minute-hand {
+                height: 100px;
+            }
+            
+            .clock-tick {
+                transform-origin: center 125px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🕐 Clock Practice</h1>
+        <p class="subtitle">Learn to Read Analog Clocks</p>
+        
+        <div class="question-text" id="questionText">What time is shown on the clock?</div>
+        
+        <div class="analog-clock" id="analogClock"></div>
+        
+        <div class="time-input-container">
+            <div class="time-digit-box active" id="hourBox1"></div>
+            <div class="time-digit-box" id="hourBox2"></div>
+            <span style="font-weight: bold;">:</span>
+            <div class="time-digit-box" id="minuteBox1"></div>
+            <div class="time-digit-box" id="minuteBox2"></div>
+        </div>
+        
+        <div class="number-pad">
+            <button class="number-btn" onclick="inputDigit('1')">1</button>
+            <button class="number-btn" onclick="inputDigit('2')">2</button>
+            <button class="number-btn" onclick="inputDigit('3')">3</button>
+            <button class="number-btn" onclick="inputDigit('4')">4</button>
+            <button class="number-btn" onclick="inputDigit('5')">5</button>
+            <button class="number-btn" onclick="inputDigit('6')">6</button>
+            <button class="number-btn" onclick="inputDigit('7')">7</button>
+            <button class="number-btn" onclick="inputDigit('8')">8</button>
+            <button class="number-btn" onclick="inputDigit('9')">9</button>
+            <button class="number-btn" onclick="inputDigit('0')">0</button>
+            <button class="number-btn backspace" onclick="deleteDigit()">← Delete</button>
+        </div>
+        
+        <div id="feedback" class="feedback" style="display: none;"></div>
+        
+        <div class="button-group">
+            <button class="action-btn check-btn" onclick="checkAnswer()">✓ Check</button>
+            <button class="action-btn next-btn" onclick="nextQuestion()">→ Next</button>
+            <button class="action-btn skip-btn" onclick="skipQuestion()">⇢ Skip</button>
+        </div>
+        
+        <div class="stats">
+            <div class="stat-item">
+                <div class="stat-number" id="correctCount">0</div>
+                <div class="stat-label">Correct</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number" id="totalCount">0</div>
+                <div class="stat-label">Attempted</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number" id="streakCount">0</div>
+                <div class="stat-label">Streak</div>
+            </div>
+        </div>
+    </div>
 
+    <script>
+        let currentHour = 0;
+        let currentMinutes = 0;
+        let stats = { correct: 0, total: 0, streak: 0 };
+        let answered = false;
+        let timeValues = ['', '', '', ''];
+        let currentBox = 0;
+
+        const rand = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
+
+        function createClock() {
+            const clock = document.getElementById('analogClock');
+            let ticksHtml = '';
+            
+            // Create tick marks
+            for (let i = 0; i < 60; i++) {
+                const angle = i * 6;
+                const isMajor = i % 5 === 0;
+                ticksHtml += `<div class="clock-tick ${isMajor ? 'major' : ''}" style="transform: translateX(-50%) rotate(${angle}deg);"></div>`;
+            }
+            
+            clock.innerHTML = ticksHtml;
+            
+            // Add clock numbers
+            const numbers = [12, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11];
+            numbers.forEach((num, index) => {
+                const angle = (index * 30 - 90) * (Math.PI / 180);
+                const radius = 120;
+                const x = 150 + radius * Math.cos(angle);
+                const y = 150 + radius * Math.sin(angle);
+                
+                const numberDiv = document.createElement('div');
+                numberDiv.className = 'clock-number';
+                numberDiv.textContent = num;
+                numberDiv.style.left = (x - 12) + 'px';
+                numberDiv.style.top = (y - 12) + 'px';
+                clock.appendChild(numberDiv);
+            });
+            
+            // Add hands
+            clock.innerHTML += '<div class="hour-hand" id="hourHand"></div>';
+            clock.innerHTML += '<div class="minute-hand" id="minuteHand"></div>';
+            clock.innerHTML += '<div class="clock-center"></div>';
+        }
+
+        function updateClock(hour, minutes) {
+            const minuteAngle = (minutes / 60) * 360;
+            const hourAngle = ((hour % 12) / 12) * 360 + (minutes / 60) * 30;
+            
+            document.getElementById('hourHand').style.transform = `translateX(-50%) rotate(${hourAngle}deg)`;
+            document.getElementById('minuteHand').style.transform = `translateX(-50%) rotate(${minuteAngle}deg)`;
+        }
+
+        function updateBoxes() {
+            const boxes = [
+                document.getElementById('hourBox1'),
+                document.getElementById('hourBox2'),
+                document.getElementById('minuteBox1'),
+                document.getElementById('minuteBox2')
+            ];
+            
+            boxes.forEach((box, i) => {
+                box.textContent = timeValues[i];
+                box.className = 'time-digit-box';
+                if (i === currentBox && !answered) {
+                    box.classList.add('active');
+                } else if (timeValues[i] !== '') {
+                    box.classList.add('filled');
+                }
+            });
+        }
+
+        function inputDigit(digit) {
+            if (answered || currentBox >= 4) return;
+            
+            timeValues[currentBox] = digit;
+            currentBox++;
+            updateBoxes();
+            
+            // Auto-check when all boxes filled
+            if (currentBox === 4) {
+                setTimeout(() => {
+                    checkAnswer();
+                }, 300);
+            }
+        }
+
+        function deleteDigit() {
+            if (answered) return;
+            
+            if (currentBox > 0) {
+                currentBox--;
+                timeValues[currentBox] = '';
+            }
+            updateBoxes();
+        }
+
+        function nextQuestion() {
+            currentHour = rand(1, 12);
+            currentMinutes = rand(0, 11) * 5;
+            
+            updateClock(currentHour, currentMinutes);
+            
+            timeValues = ['', '', '', ''];
+            currentBox = 0;
+            answered = false;
+            
+            updateBoxes();
+            document.getElementById('feedback').style.display = 'none';
+        }
+
+        function skipQuestion() {
+            nextQuestion();
+        }
+
+        function checkAnswer() {
+            if (answered) return;
+            
+            const userHour = timeValues[0] + timeValues[1];
+            const userMinute = timeValues[2] + timeValues[3];
+            
+            if (!userHour || !userMinute) {
+                const feedback = document.getElementById('feedback');
+                feedback.textContent = '⚠️ Please fill in all boxes!';
+                feedback.className = 'feedback incorrect';
+                feedback.style.display = 'block';
+                return;
+            }
+            
+            answered = true;
+            stats.total++;
+            
+            const correctHour = currentHour.toString().padStart(2, '0');
+            const correctMinute = currentMinutes.toString().padStart(2, '0');
+            
+            const feedback = document.getElementById('feedback');
+            
+            if (userHour === correctHour && userMinute === correctMinute) {
+                stats.correct++;
+                stats.streak++;
+                feedback.innerHTML = `🎉 Correct! The time is ${correctHour}:${correctMinute}`;
+                feedback.className = 'feedback correct';
+                
+                if (stats.streak === 5) {
+                    feedback.innerHTML += `<br><span style="font-size: 1.2em;">🌟 5 in a row! Amazing! 🌟</span>`;
+                }
+            } else {
+                stats.streak = 0;
+                feedback.innerHTML = `❌ Not quite. The correct time is <strong>${correctHour}:${correctMinute}</strong>`;
+                feedback.className = 'feedback incorrect';
+            }
+            
+            feedback.style.display = 'block';
+            updateStats();
+        }
+
+        function updateStats() {
+            document.getElementById('correctCount').textContent = stats.correct;
+            document.getElementById('totalCount').textContent = stats.total;
+            document.getElementById('streakCount').textContent = stats.streak;
+        }
+
+        // Initialize
+        createClock();
+        nextQuestion();
+    </script>
+</body>
+</html>
