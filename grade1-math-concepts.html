@@ -113,10 +113,12 @@
         
         #digitBoxContainer {
             outline: none;
+            cursor: pointer;
         }
         
         #digitBoxContainer:focus {
-            outline: none;
+            outline: 2px dashed #667eea;
+            outline-offset: 5px;
         }
         
         .digit-box {
@@ -642,11 +644,18 @@
                 answerInput.style.display = 'none';
                 digitBoxContainer.style.display = 'block';
                 document.getElementById('questionText').innerHTML = q.question;
+                
+                // Remove old listener before adding new one
+                document.removeEventListener('keydown', handleDigitInput);
+                document.addEventListener('keydown', handleDigitInput);
+                
                 createDigitBoxes(correctAnswer.length);
+                
                 // Focus after a brief delay to ensure DOM is ready
                 setTimeout(() => {
                     digitBoxContainer.focus();
-                }, 100);
+                    console.log('Focused on digit container');
+                }, 150);
             } else {
                 oddEvenButtons.style.display = 'none';
                 answerInput.style.display = 'block';
@@ -665,19 +674,20 @@
             digitBoxValues = new Array(numDigits).fill('');
             currentDigitIndex = numDigits - 1; // Start from rightmost
             
-            container.innerHTML = '<div class="digit-boxes">' + 
+            container.innerHTML = '<div class="digit-boxes" id="digitBoxesInner">' + 
                 Array(numDigits).fill(0).map((_, i) => 
                     `<div class="digit-box" id="digitBox${i}"></div>`
                 ).join('') + 
-                '</div>';
+                '</div><p style="color: #666; font-size: 0.9em; margin-top: 10px;">Click here and type your answer</p>';
             
             updateDigitBoxes();
-            // Remove old listener and add new one
-            document.removeEventListener('keydown', handleDigitInput);
-            document.addEventListener('keydown', handleDigitInput);
             
-            // Focus on the container to ensure key events are captured
-            container.focus();
+            // Make container clickable and focusable
+            container.onclick = function() {
+                container.focus();
+            };
+            
+            console.log('Created digit boxes, numDigits:', numDigits, 'currentIndex:', currentDigitIndex);
         }
         
         function updateDigitBoxes() {
@@ -696,9 +706,11 @@
         }
         
         function handleDigitInput(event) {
-            if (answered) return;
+            const type = document.getElementById('questionType').value;
+            if (answered || (type !== 'addition' && type !== 'subtraction')) return;
             
             const key = event.key;
+            console.log('Key pressed:', key, 'Current index:', currentDigitIndex);
             
             // Handle number input
             if (key >= '0' && key <= '9') {
@@ -716,6 +728,7 @@
                     }
                 }
                 event.preventDefault();
+                return false;
             }
             // Handle backspace
             else if (key === 'Backspace') {
@@ -725,6 +738,7 @@
                 digitBoxValues[currentDigitIndex] = '';
                 updateDigitBoxes();
                 event.preventDefault();
+                return false;
             }
         }
         
