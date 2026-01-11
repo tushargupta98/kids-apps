@@ -103,6 +103,34 @@
             margin-top: 10px;
         }
         
+        .digit-boxes {
+            display: flex;
+            gap: 5px;
+            justify-content: center;
+            margin-top: 10px;
+        }
+        
+        .digit-box {
+            width: 60px;
+            height: 70px;
+            border: 3px solid #667eea;
+            background: white;
+            font-size: 2em;
+            text-align: center;
+            border-radius: 8px;
+            font-family: monospace;
+            line-height: 70px;
+        }
+        
+        .digit-box.active {
+            border-color: #10b981;
+            background: #d1fae5;
+        }
+        
+        .digit-box.filled {
+            background: #f3f4f6;
+        }
+        
         .answer-input {
             width: 100%;
             padding: 20px;
@@ -285,6 +313,7 @@
         
         <div class="question-card">
             <div class="question-text" id="questionText"></div>
+            <div id="digitBoxContainer" style="display: none;"></div>
             <div id="oddEvenButtons" style="display: none; justify-content: center; gap: 20px; margin-bottom: 20px;">
                 <button class="odd-even-btn" onclick="selectOddEven('odd')" style="background: #f59e0b; color: white; padding: 20px 40px; font-size: 1.5em; border: none; border-radius: 10px; cursor: pointer;">Odd</button>
                 <button class="odd-even-btn" onclick="selectOddEven('even')" style="background: #3b82f6; color: white; padding: 20px 40px; font-size: 1.5em; border: none; border-radius: 10px; cursor: pointer;">Even</button>
@@ -321,6 +350,8 @@
         let correctAnswer = '';
         let stats = { correct: 0, total: 0, streak: 0 };
         let answered = false;
+        let digitBoxValues = [];
+        let currentDigitIndex = -1;
 
         const rand = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
         const randEven = (min, max) => {
@@ -570,6 +601,7 @@
         }
 
         function startNewType() {
+            document.removeEventListener('keydown', handleDigitInput);
             stats = { correct: 0, total: 0, streak: 0 };
             updateStats();
             nextQuestion();
@@ -584,23 +616,97 @@
             document.getElementById('questionText').textContent = q.question;
             document.getElementById('answerInput').value = '';
             document.getElementById('feedback').style.display = 'none';
-            document.getElementById('answerInput').focus();
             answered = false;
             
             // Show odd/even buttons only for oddEven question type
             const oddEvenButtons = document.getElementById('oddEvenButtons');
             const answerInput = document.getElementById('answerInput');
+            const digitBoxContainer = document.getElementById('digitBoxContainer');
+            
             if (type === 'oddEven') {
                 oddEvenButtons.style.display = 'flex';
                 answerInput.style.display = 'none';
+                digitBoxContainer.style.display = 'none';
+            } else if (type === 'addition' || type === 'subtraction') {
+                // Show digit boxes for addition/subtraction
+                oddEvenButtons.style.display = 'none';
+                answerInput.style.display = 'none';
+                digitBoxContainer.style.display = 'block';
+                createDigitBoxes(correctAnswer.length);
+                document.getElementById('questionText').innerHTML = q.question;
             } else {
                 oddEvenButtons.style.display = 'none';
                 answerInput.style.display = 'block';
+                digitBoxContainer.style.display = 'none';
+                answerInput.focus();
             }
             
             // Use innerHTML for vertical math formatting
             if (type === 'addition' || type === 'subtraction') {
                 document.getElementById('questionText').innerHTML = q.question;
+            }
+        }
+        
+        function createDigitBoxes(numDigits) {
+            const container = document.getElementById('digitBoxContainer');
+            digitBoxValues = new Array(numDigits).fill('');
+            currentDigitIndex = numDigits - 1; // Start from rightmost
+            
+            container.innerHTML = '<div class="digit-boxes">' + 
+                Array(numDigits).fill(0).map((_, i) => 
+                    `<div class="digit-box" id="digitBox${i}"></div>`
+                ).join('') + 
+                '</div>';
+            
+            updateDigitBoxes();
+            document.addEventListener('keydown', handleDigitInput);
+        }
+        
+        function updateDigitBoxes() {
+            digitBoxValues.forEach((val, i) => {
+                const box = document.getElementById(`digitBox${i}`);
+                if (box) {
+                    box.textContent = val;
+                    box.className = 'digit-box';
+                    if (i === currentDigitIndex) {
+                        box.classList.add('active');
+                    } else if (val !== '') {
+                        box.classList.add('filled');
+                    }
+                }
+            });
+        }
+        
+        function handleDigitInput(event) {
+            if (answered) return;
+            
+            const key = event.key;
+            
+            // Handle number input
+            if (key >= '0' && key <= '9') {
+                if (currentDigitIndex >= 0) {
+                    digitBoxValues[currentDigitIndex] = key;
+                    currentDigitIndex--;
+                    updateDigitBoxes();
+                    
+                    // Auto-check when all boxes filled
+                    if (currentDigitIndex < 0) {
+                        setTimeout(() => {
+                            document.getElementById('answerInput').value = digitBoxValues.join('');
+                            checkAnswer();
+                        }, 300);
+                    }
+                }
+                event.preventDefault();
+            }
+            // Handle backspace
+            else if (key === 'Backspace') {
+                if (currentDigitIndex < digitBoxValues.length - 1) {
+                    currentDigitIndex++;
+                }
+                digitBoxValues[currentDigitIndex] = '';
+                updateDigitBoxes();
+                event.preventDefault();
             }
         }
         
@@ -646,6 +752,7 @@
         }
 
         function skipQuestion() {
+            document.removeEventListener('keydown', handleDigitInput);
             nextQuestion();
         }
 
