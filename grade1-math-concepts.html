@@ -679,6 +679,9 @@
             const digitBoxContainer = document.getElementById('digitBoxContainer');
             const numberPad = document.getElementById('numberPad');
             
+            // Question types that don't need number pad (text answers)
+            const textAnswerTypes = ['oddEven', 'greaterLess', 'measurement', 'commutative'];
+            
             if (type === 'oddEven') {
                 oddEvenButtons.style.display = 'flex';
                 answerInput.style.display = 'none';
@@ -702,11 +705,19 @@
                 setTimeout(() => {
                     digitBoxContainer.focus();
                 }, 150);
-            } else {
+            } else if (textAnswerTypes.includes(type)) {
+                // Text input for these types
                 oddEvenButtons.style.display = 'none';
                 answerInput.style.display = 'block';
                 digitBoxContainer.style.display = 'none';
                 numberPad.style.display = 'none';
+                answerInput.focus();
+            } else {
+                // Show text input with number pad for all other numeric questions
+                oddEvenButtons.style.display = 'none';
+                answerInput.style.display = 'block';
+                digitBoxContainer.style.display = 'none';
+                numberPad.style.display = 'block';
                 answerInput.focus();
             }
             
@@ -793,29 +804,47 @@
         }
         
         function inputDigit(digit) {
-            if (answered || currentDigitIndex < 0) return;
+            const type = document.getElementById('questionType').value;
             
-            digitBoxValues[currentDigitIndex] = digit;
-            currentDigitIndex--;
-            updateDigitBoxes();
-            
-            // Auto-check when all boxes filled
-            if (currentDigitIndex < 0) {
-                setTimeout(() => {
-                    document.getElementById('answerInput').value = digitBoxValues.join('');
-                    checkAnswer();
-                }, 300);
+            // For addition/subtraction with digit boxes
+            if ((type === 'addition' || type === 'subtraction') && !answered && currentDigitIndex >= 0) {
+                digitBoxValues[currentDigitIndex] = digit;
+                currentDigitIndex--;
+                updateDigitBoxes();
+                
+                // Auto-check when all boxes filled
+                if (currentDigitIndex < 0) {
+                    setTimeout(() => {
+                        document.getElementById('answerInput').value = digitBoxValues.join('');
+                        checkAnswer();
+                    }, 300);
+                }
+            } 
+            // For other question types with text input
+            else if (type !== 'addition' && type !== 'subtraction') {
+                const answerInput = document.getElementById('answerInput');
+                answerInput.value += digit;
+                answerInput.focus();
             }
         }
         
         function deleteDigit() {
-            if (answered) return;
+            const type = document.getElementById('questionType').value;
             
-            if (currentDigitIndex < digitBoxValues.length - 1) {
-                currentDigitIndex++;
+            // For addition/subtraction with digit boxes
+            if ((type === 'addition' || type === 'subtraction') && !answered) {
+                if (currentDigitIndex < digitBoxValues.length - 1) {
+                    currentDigitIndex++;
+                }
+                digitBoxValues[currentDigitIndex] = '';
+                updateDigitBoxes();
             }
-            digitBoxValues[currentDigitIndex] = '';
-            updateDigitBoxes();
+            // For other question types with text input
+            else if (type !== 'addition' && type !== 'subtraction') {
+                const answerInput = document.getElementById('answerInput');
+                answerInput.value = answerInput.value.slice(0, -1);
+                answerInput.focus();
+            }
         }
 
         function checkAnswer() {
