@@ -1,1 +1,626 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📏 Number Line Practice - Grade 1</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Comic Sans MS', 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 900px;
+            width: 100%;
+            padding: 40px;
+        }
+        
+        h1 {
+            color: #667eea;
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+        }
+        
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 1.1em;
+        }
+        
+        .mode-selector {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+        
+        .mode-btn {
+            padding: 15px 25px;
+            font-size: 1.1em;
+            font-weight: bold;
+            border: 3px solid #667eea;
+            border-radius: 10px;
+            background: white;
+            color: #667eea;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .mode-btn.active {
+            background: #667eea;
+            color: white;
+        }
+        
+        .mode-btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        .question-text {
+            font-size: 1.5em;
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+            font-weight: bold;
+        }
+        
+        .number-line-container {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            padding: 40px 20px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            overflow-x: auto;
+        }
+        
+        .number-line {
+            position: relative;
+            margin: 0 auto;
+            width: 100%;
+            max-width: 700px;
+        }
+        
+        .line {
+            height: 4px;
+            background: #333;
+            position: relative;
+        }
+        
+        .tick {
+            position: absolute;
+            width: 3px;
+            height: 25px;
+            background: #333;
+            top: -10px;
+        }
+        
+        .number-label {
+            position: absolute;
+            top: 20px;
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #333;
+            transform: translateX(-50%);
+        }
+        
+        .jump-arrow {
+            position: absolute;
+            top: -40px;
+            height: 30px;
+            transform: translateX(-50%);
+        }
+        
+        .arrow-curve {
+            stroke: #10b981;
+            stroke-width: 3;
+            fill: none;
+        }
+        
+        .arrow-label {
+            position: absolute;
+            top: -70px;
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #10b981;
+            transform: translateX(-50%);
+        }
+        
+        .marker {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            background: #ef4444;
+            border: 3px solid #991b1b;
+            border-radius: 50%;
+            top: -13px;
+            transform: translateX(-50%);
+            animation: bounce 1s infinite;
+        }
+        
+        @keyframes bounce {
+            0%, 100% { transform: translateX(-50%) translateY(0); }
+            50% { transform: translateX(-50%) translateY(-10px); }
+        }
+        
+        .answer-input {
+            width: 100%;
+            max-width: 200px;
+            padding: 20px;
+            font-size: 1.5em;
+            text-align: center;
+            border: 3px solid #667eea;
+            border-radius: 10px;
+            margin: 20px auto;
+            display: block;
+        }
+        
+        .answer-input:focus {
+            outline: none;
+            border-color: #764ba2;
+            box-shadow: 0 0 0 3px rgba(118, 75, 162, 0.1);
+        }
+        
+        .number-pad {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            max-width: 240px;
+            margin: 15px auto;
+        }
+        
+        .number-btn {
+            padding: 12px;
+            font-size: 1.3em;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        
+        .number-btn:active {
+            background: #764ba2;
+            transform: scale(0.95);
+        }
+        
+        .number-btn.backspace {
+            background: #ef4444;
+            grid-column: span 3;
+            font-size: 1em;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        button.action-btn {
+            flex: 1;
+            padding: 18px;
+            font-size: 1.2em;
+            font-weight: bold;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .check-btn {
+            background: #10b981;
+            color: white;
+        }
+        
+        .check-btn:hover {
+            background: #059669;
+            transform: translateY(-2px);
+        }
+        
+        .next-btn {
+            background: #667eea;
+            color: white;
+        }
+        
+        .next-btn:hover {
+            background: #764ba2;
+            transform: translateY(-2px);
+        }
+        
+        .skip-btn {
+            background: #f59e0b;
+            color: white;
+        }
+        
+        .skip-btn:hover {
+            background: #d97706;
+            transform: translateY(-2px);
+        }
+        
+        .feedback {
+            text-align: center;
+            font-size: 1.5em;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+        
+        .feedback.correct {
+            background: #d1fae5;
+            color: #065f46;
+        }
+        
+        .feedback.incorrect {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+        
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            background: #f3f4f6;
+            padding: 20px;
+            border-radius: 10px;
+        }
+        
+        .stat-item {
+            text-align: center;
+        }
+        
+        .stat-number {
+            font-size: 2em;
+            font-weight: bold;
+            color: #667eea;
+        }
+        
+        .stat-label {
+            color: #666;
+            margin-top: 5px;
+        }
+        
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px;
+            }
+            
+            h1 {
+                font-size: 2em;
+            }
+            
+            .number-line-container {
+                padding: 30px 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📏 Number Line Practice</h1>
+        <p class="subtitle">Learn Addition and Subtraction with Number Lines</p>
+        
+        <div class="mode-selector">
+            <button class="mode-btn active" onclick="changeMode('addition')">Addition</button>
+            <button class="mode-btn" onclick="changeMode('subtraction')">Subtraction</button>
+            <button class="mode-btn" onclick="changeMode('find')">Find Missing Number</button>
+            <button class="mode-btn" onclick="changeMode('compare')">Compare Numbers</button>
+        </div>
+        
+        <div class="question-text" id="questionText"></div>
+        
+        <div class="number-line-container">
+            <div class="number-line" id="numberLine"></div>
+        </div>
+        
+        <input type="text" id="answerInput" class="answer-input" placeholder="?" onkeypress="handleEnter(event)">
+        
+        <div class="number-pad">
+            <button class="number-btn" onclick="inputDigit('1')">1</button>
+            <button class="number-btn" onclick="inputDigit('2')">2</button>
+            <button class="number-btn" onclick="inputDigit('3')">3</button>
+            <button class="number-btn" onclick="inputDigit('4')">4</button>
+            <button class="number-btn" onclick="inputDigit('5')">5</button>
+            <button class="number-btn" onclick="inputDigit('6')">6</button>
+            <button class="number-btn" onclick="inputDigit('7')">7</button>
+            <button class="number-btn" onclick="inputDigit('8')">8</button>
+            <button class="number-btn" onclick="inputDigit('9')">9</button>
+            <button class="number-btn" onclick="inputDigit('0')">0</button>
+            <button class="number-btn backspace" onclick="deleteDigit()">← Delete</button>
+        </div>
+        
+        <div id="feedback" class="feedback" style="display: none;"></div>
+        
+        <div class="button-group">
+            <button class="action-btn check-btn" onclick="checkAnswer()">✓ Check</button>
+            <button class="action-btn next-btn" onclick="nextQuestion()">→ Next</button>
+            <button class="action-btn skip-btn" onclick="skipQuestion()">⇢ Skip</button>
+        </div>
+        
+        <div class="stats">
+            <div class="stat-item">
+                <div class="stat-number" id="correctCount">0</div>
+                <div class="stat-label">Correct</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number" id="totalCount">0</div>
+                <div class="stat-label">Attempted</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number" id="streakCount">0</div>
+                <div class="stat-label">Streak</div>
+            </div>
+        </div>
+    </div>
 
+    <script>
+        let currentMode = 'addition';
+        let currentQuestion = {};
+        let correctAnswer = 0;
+        let stats = { correct: 0, total: 0, streak: 0 };
+        let answered = false;
+
+        const rand = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
+
+        function changeMode(mode) {
+            currentMode = mode;
+            document.querySelectorAll('.mode-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            nextQuestion();
+        }
+
+        function drawNumberLine(start, end, highlightStart, highlightEnd, showJumps) {
+            const container = document.getElementById('numberLine');
+            container.innerHTML = '';
+            
+            const line = document.createElement('div');
+            line.className = 'line';
+            container.appendChild(line);
+            
+            const range = end - start;
+            
+            // Draw ticks and numbers
+            for (let i = start; i <= end; i++) {
+                const position = ((i - start) / range) * 100;
+                
+                const tick = document.createElement('div');
+                tick.className = 'tick';
+                tick.style.left = position + '%';
+                container.appendChild(tick);
+                
+                const label = document.createElement('div');
+                label.className = 'number-label';
+                label.textContent = i;
+                label.style.left = position + '%';
+                container.appendChild(label);
+            }
+            
+            // Draw jumps for addition/subtraction
+            if (showJumps && currentMode !== 'compare' && currentMode !== 'find') {
+                const startPos = ((highlightStart - start) / range) * 100;
+                const endPos = ((highlightEnd - start) / range) * 100;
+                const jumpSize = Math.abs(highlightEnd - highlightStart);
+                
+                const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+                svg.setAttribute('class', 'jump-arrow');
+                svg.setAttribute('width', Math.abs(endPos - startPos) + '%');
+                svg.setAttribute('height', '30');
+                svg.style.left = Math.min(startPos, endPos) + '%';
+                svg.style.width = Math.abs(endPos - startPos) + '%';
+                
+                const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                const direction = highlightEnd > highlightStart ? 1 : -1;
+                const pathData = direction > 0 
+                    ? `M 5 25 Q 50% 5, 95% 25` 
+                    : `M 95% 25 Q 50% 5, 5 25`;
+                path.setAttribute('d', pathData);
+                path.setAttribute('class', 'arrow-curve');
+                
+                // Add arrowhead
+                const arrowhead = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+                const arrowX = direction > 0 ? '95%' : '5';
+                arrowhead.setAttribute('points', direction > 0 ? '100,25 95,20 95,30' : '0,25 5,20 5,30');
+                arrowhead.setAttribute('fill', '#10b981');
+                
+                svg.appendChild(path);
+                svg.appendChild(arrowhead);
+                container.appendChild(svg);
+                
+                const jumpLabel = document.createElement('div');
+                jumpLabel.className = 'arrow-label';
+                jumpLabel.textContent = (currentMode === 'addition' ? '+' : '-') + jumpSize;
+                jumpLabel.style.left = ((startPos + endPos) / 2) + '%';
+                container.appendChild(jumpLabel);
+            }
+            
+            // Draw marker
+            if (highlightStart !== null) {
+                const markerPos = ((highlightStart - start) / range) * 100;
+                const marker = document.createElement('div');
+                marker.className = 'marker';
+                marker.style.left = markerPos + '%';
+                container.appendChild(marker);
+            }
+        }
+
+        function generateQuestion() {
+            let question = '';
+            let answer = 0;
+            let start, end, num1, num2;
+            
+            switch(currentMode) {
+                case 'addition':
+                    num1 = rand(1, 15);
+                    num2 = rand(1, 10);
+                    answer = num1 + num2;
+                    start = Math.max(0, num1 - 2);
+                    end = answer + 2;
+                    question = `${num1} + ${num2} = ?`;
+                    currentQuestion = { type: 'addition', num1, num2, start, end };
+                    drawNumberLine(start, end, num1, answer, true);
+                    break;
+                    
+                case 'subtraction':
+                    num1 = rand(10, 20);
+                    num2 = rand(1, Math.min(8, num1));
+                    answer = num1 - num2;
+                    start = Math.max(0, answer - 2);
+                    end = num1 + 2;
+                    question = `${num1} - ${num2} = ?`;
+                    currentQuestion = { type: 'subtraction', num1, num2, start, end };
+                    drawNumberLine(start, end, num1, answer, true);
+                    break;
+                    
+                case 'find':
+                    start = rand(0, 10);
+                    end = start + rand(8, 12);
+                    const missing = rand(start + 1, end - 1);
+                    answer = missing;
+                    question = `What number is marked on the number line?`;
+                    currentQuestion = { type: 'find', missing, start, end };
+                    drawNumberLine(start, end, missing, null, false);
+                    break;
+                    
+                case 'compare':
+                    num1 = rand(5, 15);
+                    num2 = rand(5, 15);
+                    while (num1 === num2) num2 = rand(5, 15);
+                    start = Math.min(num1, num2) - 2;
+                    end = Math.max(num1, num2) + 2;
+                    answer = Math.abs(num1 - num2);
+                    question = `How many numbers apart are ${num1} and ${num2}?`;
+                    currentQuestion = { type: 'compare', num1, num2, start, end };
+                    
+                    const container = document.getElementById('numberLine');
+                    container.innerHTML = '';
+                    const line = document.createElement('div');
+                    line.className = 'line';
+                    container.appendChild(line);
+                    
+                    const range = end - start;
+                    for (let i = start; i <= end; i++) {
+                        const position = ((i - start) / range) * 100;
+                        const tick = document.createElement('div');
+                        tick.className = 'tick';
+                        tick.style.left = position + '%';
+                        container.appendChild(tick);
+                        
+                        const label = document.createElement('div');
+                        label.className = 'number-label';
+                        label.textContent = i;
+                        label.style.left = position + '%';
+                        container.appendChild(label);
+                    }
+                    
+                    // Add markers for both numbers
+                    [num1, num2].forEach(num => {
+                        const markerPos = ((num - start) / range) * 100;
+                        const marker = document.createElement('div');
+                        marker.className = 'marker';
+                        marker.style.left = markerPos + '%';
+                        container.appendChild(marker);
+                    });
+                    break;
+            }
+            
+            return { question, answer };
+        }
+
+        function nextQuestion() {
+            const q = generateQuestion();
+            document.getElementById('questionText').textContent = q.question;
+            correctAnswer = q.answer;
+            document.getElementById('answerInput').value = '';
+            document.getElementById('feedback').style.display = 'none';
+            answered = false;
+        }
+
+        function skipQuestion() {
+            nextQuestion();
+        }
+
+        function inputDigit(digit) {
+            const input = document.getElementById('answerInput');
+            input.value += digit;
+            input.focus();
+        }
+
+        function deleteDigit() {
+            const input = document.getElementById('answerInput');
+            input.value = input.value.slice(0, -1);
+            input.focus();
+        }
+
+        function handleEnter(event) {
+            if (event.key === 'Enter') {
+                if (!answered) {
+                    checkAnswer();
+                } else {
+                    nextQuestion();
+                }
+            }
+        }
+
+        function checkAnswer() {
+            if (answered) return;
+            
+            const userAnswer = parseInt(document.getElementById('answerInput').value);
+            
+            if (isNaN(userAnswer)) {
+                const feedback = document.getElementById('feedback');
+                feedback.textContent = '⚠️ Please enter a number!';
+                feedback.className = 'feedback incorrect';
+                feedback.style.display = 'block';
+                return;
+            }
+            
+            answered = true;
+            stats.total++;
+            
+            const feedback = document.getElementById('feedback');
+            
+            if (userAnswer === correctAnswer) {
+                stats.correct++;
+                stats.streak++;
+                feedback.innerHTML = `🎉 Correct! The answer is ${correctAnswer}`;
+                feedback.className = 'feedback correct';
+                
+                if (stats.streak === 5) {
+                    feedback.innerHTML += `<br><span style="font-size: 1.2em;">🌟 5 in a row! Fantastic! 🌟</span>`;
+                }
+            } else {
+                stats.streak = 0;
+                feedback.innerHTML = `❌ Not quite. The correct answer is <strong>${correctAnswer}</strong>`;
+                feedback.className = 'feedback incorrect';
+            }
+            
+            feedback.style.display = 'block';
+            updateStats();
+        }
+
+        function updateStats() {
+            document.getElementById('correctCount').textContent = stats.correct;
+            document.getElementById('totalCount').textContent = stats.total;
+            document.getElementById('streakCount').textContent = stats.streak;
+        }
+
+        // Initialize
+        nextQuestion();
+    </script>
+</body>
+</html>
