@@ -141,6 +141,35 @@
             background: #f3f4f6;
         }
         
+        .number-pad {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            max-width: 300px;
+            margin: 20px auto;
+        }
+        
+        .number-btn {
+            padding: 20px;
+            font-size: 2em;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        
+        .number-btn:active {
+            background: #764ba2;
+            transform: scale(0.95);
+        }
+        
+        .number-btn.backspace {
+            background: #ef4444;
+            grid-column: span 3;
+        }
+        
         .answer-input {
             width: 100%;
             padding: 20px;
@@ -324,6 +353,21 @@
         <div class="question-card">
             <div class="question-text" id="questionText"></div>
             <div id="digitBoxContainer" style="display: none;" tabindex="0"></div>
+            <div id="numberPad" style="display: none;">
+                <div class="number-pad">
+                    <button class="number-btn" onclick="inputDigit('1')">1</button>
+                    <button class="number-btn" onclick="inputDigit('2')">2</button>
+                    <button class="number-btn" onclick="inputDigit('3')">3</button>
+                    <button class="number-btn" onclick="inputDigit('4')">4</button>
+                    <button class="number-btn" onclick="inputDigit('5')">5</button>
+                    <button class="number-btn" onclick="inputDigit('6')">6</button>
+                    <button class="number-btn" onclick="inputDigit('7')">7</button>
+                    <button class="number-btn" onclick="inputDigit('8')">8</button>
+                    <button class="number-btn" onclick="inputDigit('9')">9</button>
+                    <button class="number-btn" onclick="inputDigit('0')">0</button>
+                    <button class="number-btn backspace" onclick="deleteDigit()">← Delete</button>
+                </div>
+            </div>
             <div id="oddEvenButtons" style="display: none; justify-content: center; gap: 20px; margin-bottom: 20px;">
                 <button class="odd-even-btn" onclick="selectOddEven('odd')" style="background: #f59e0b; color: white; padding: 20px 40px; font-size: 1.5em; border: none; border-radius: 10px; cursor: pointer;">Odd</button>
                 <button class="odd-even-btn" onclick="selectOddEven('even')" style="background: #3b82f6; color: white; padding: 20px 40px; font-size: 1.5em; border: none; border-radius: 10px; cursor: pointer;">Even</button>
@@ -632,16 +676,19 @@
             const oddEvenButtons = document.getElementById('oddEvenButtons');
             const answerInput = document.getElementById('answerInput');
             const digitBoxContainer = document.getElementById('digitBoxContainer');
+            const numberPad = document.getElementById('numberPad');
             
             if (type === 'oddEven') {
                 oddEvenButtons.style.display = 'flex';
                 answerInput.style.display = 'none';
                 digitBoxContainer.style.display = 'none';
+                numberPad.style.display = 'none';
             } else if (type === 'addition' || type === 'subtraction') {
                 // Show digit boxes for addition/subtraction
                 oddEvenButtons.style.display = 'none';
                 answerInput.style.display = 'none';
                 digitBoxContainer.style.display = 'block';
+                numberPad.style.display = 'block';
                 document.getElementById('questionText').innerHTML = q.question;
                 
                 // Remove old listener before adding new one
@@ -658,6 +705,7 @@
                 oddEvenButtons.style.display = 'none';
                 answerInput.style.display = 'block';
                 digitBoxContainer.style.display = 'none';
+                numberPad.style.display = 'none';
                 answerInput.focus();
             }
             
@@ -741,6 +789,32 @@
             if (answered) return;
             document.getElementById('answerInput').value = choice;
             checkAnswer();
+        }
+        
+        function inputDigit(digit) {
+            if (answered || currentDigitIndex < 0) return;
+            
+            digitBoxValues[currentDigitIndex] = digit;
+            currentDigitIndex--;
+            updateDigitBoxes();
+            
+            // Auto-check when all boxes filled
+            if (currentDigitIndex < 0) {
+                setTimeout(() => {
+                    document.getElementById('answerInput').value = digitBoxValues.join('');
+                    checkAnswer();
+                }, 300);
+            }
+        }
+        
+        function deleteDigit() {
+            if (answered) return;
+            
+            if (currentDigitIndex < digitBoxValues.length - 1) {
+                currentDigitIndex++;
+            }
+            digitBoxValues[currentDigitIndex] = '';
+            updateDigitBoxes();
         }
 
         function checkAnswer() {
