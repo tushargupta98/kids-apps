@@ -783,7 +783,7 @@
             document.getElementById('feedback').style.display = 'none';
             answered = false;
             
-            // Show odd/even buttons only for oddEven question type
+            // Get all UI elements
             const oddEvenButtons = document.getElementById('oddEvenButtons');
             const greaterLessButtons = document.getElementById('greaterLessButtons');
             const answerInput = document.getElementById('answerInput');
@@ -792,42 +792,34 @@
             const clockContainer = document.getElementById('clockContainer');
             const timeInputContainer = document.getElementById('timeInputContainer');
             
-            // Question types that don't need number pad (text answers or need commas/spaces)
-            const textAnswerTypes = ['measurement', 'commutative', 'skip2', 'skip5', 'skip10', 'skip3', 'pattern'];
-            
             // Hide all initially
+            oddEvenButtons.style.display = 'none';
+            greaterLessButtons.style.display = 'none';
+            answerInput.style.display = 'none';
+            digitBoxContainer.style.display = 'none';
+            numberPad.style.display = 'none';
             clockContainer.style.display = 'none';
             timeInputContainer.style.display = 'none';
             
+            // Question types that don't need number pad (text answers or need commas/spaces)
+            const textAnswerTypes = ['measurement', 'commutative', 'skip2', 'skip5', 'skip10', 'skip3', 'pattern'];
+            
             if (type === 'oddEven') {
+                // Show Odd/Even buttons
                 oddEvenButtons.style.display = 'flex';
-                greaterLessButtons.style.display = 'none';
-                answerInput.style.display = 'none';
-                digitBoxContainer.style.display = 'none';
-                numberPad.style.display = 'none';
             } else if (type === 'greaterLess') {
-                oddEvenButtons.style.display = 'none';
+                // Show Greater/Less buttons
                 greaterLessButtons.style.display = 'flex';
-                answerInput.style.display = 'none';
-                digitBoxContainer.style.display = 'none';
-                numberPad.style.display = 'none';
             } else if (type === 'timeHour' || type === 'timeHalf') {
-                // Show analog clock and time input boxes
-                oddEvenButtons.style.display = 'none';
-                greaterLessButtons.style.display = 'none';
-                answerInput.style.display = 'none';
-                digitBoxContainer.style.display = 'none';
-                numberPad.style.display = 'block';
+                // Show analog clock and time input boxes with number pad
                 clockContainer.style.display = 'block';
                 timeInputContainer.style.display = 'block';
+                numberPad.style.display = 'block';
                 
                 createAnalogClock(currentQuestion.hour, currentQuestion.minutes);
                 createTimeInputBoxes();
             } else if (type === 'addition' || type === 'subtraction') {
-                // Show digit boxes for addition/subtraction
-                oddEvenButtons.style.display = 'none';
-                greaterLessButtons.style.display = 'none';
-                answerInput.style.display = 'none';
+                // Show digit boxes for addition/subtraction with number pad
                 digitBoxContainer.style.display = 'block';
                 numberPad.style.display = 'block';
                 document.getElementById('questionText').innerHTML = q.question;
@@ -843,19 +835,12 @@
                     digitBoxContainer.focus();
                 }, 150);
             } else if (textAnswerTypes.includes(type)) {
-                // Text input for these types (no number pad)
-                oddEvenButtons.style.display = 'none';
-                greaterLessButtons.style.display = 'none';
+                // Text input for these types (no number pad - need keyboard for commas/text)
                 answerInput.style.display = 'block';
-                digitBoxContainer.style.display = 'none';
-                numberPad.style.display = 'none';
                 answerInput.focus();
             } else {
                 // Show text input with number pad for all other numeric questions
-                oddEvenButtons.style.display = 'none';
-                greaterLessButtons.style.display = 'none';
                 answerInput.style.display = 'block';
-                digitBoxContainer.style.display = 'none';
                 numberPad.style.display = 'block';
                 answerInput.focus();
             }
