@@ -108,6 +108,15 @@
             gap: 5px;
             justify-content: center;
             margin-top: 10px;
+            outline: none;
+        }
+        
+        #digitBoxContainer {
+            outline: none;
+        }
+        
+        #digitBoxContainer:focus {
+            outline: none;
         }
         
         .digit-box {
@@ -313,7 +322,7 @@
         
         <div class="question-card">
             <div class="question-text" id="questionText"></div>
-            <div id="digitBoxContainer" style="display: none;"></div>
+            <div id="digitBoxContainer" style="display: none;" tabindex="0"></div>
             <div id="oddEvenButtons" style="display: none; justify-content: center; gap: 20px; margin-bottom: 20px;">
                 <button class="odd-even-btn" onclick="selectOddEven('odd')" style="background: #f59e0b; color: white; padding: 20px 40px; font-size: 1.5em; border: none; border-radius: 10px; cursor: pointer;">Odd</button>
                 <button class="odd-even-btn" onclick="selectOddEven('even')" style="background: #3b82f6; color: white; padding: 20px 40px; font-size: 1.5em; border: none; border-radius: 10px; cursor: pointer;">Even</button>
@@ -632,8 +641,12 @@
                 oddEvenButtons.style.display = 'none';
                 answerInput.style.display = 'none';
                 digitBoxContainer.style.display = 'block';
-                createDigitBoxes(correctAnswer.length);
                 document.getElementById('questionText').innerHTML = q.question;
+                createDigitBoxes(correctAnswer.length);
+                // Focus after a brief delay to ensure DOM is ready
+                setTimeout(() => {
+                    digitBoxContainer.focus();
+                }, 100);
             } else {
                 oddEvenButtons.style.display = 'none';
                 answerInput.style.display = 'block';
@@ -659,7 +672,12 @@
                 '</div>';
             
             updateDigitBoxes();
+            // Remove old listener and add new one
+            document.removeEventListener('keydown', handleDigitInput);
             document.addEventListener('keydown', handleDigitInput);
+            
+            // Focus on the container to ensure key events are captured
+            container.focus();
         }
         
         function updateDigitBoxes() {
