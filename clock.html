@@ -53,68 +53,15 @@
         .analog-clock {
             width: 300px;
             height: 300px;
+            margin: 30px auto;
+            position: relative;
+        }
+        
+        #clockCanvas {
             border: 10px solid #333;
             border-radius: 50%;
-            position: relative;
-            margin: 30px auto;
             background: white;
             box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-        }
-        
-        .clock-center {
-            width: 16px;
-            height: 16px;
-            background: #333;
-            border-radius: 50%;
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            z-index: 10;
-        }
-        
-        .hour-hand {
-            width: 8px;
-            height: 80px;
-            background: #333;
-            position: absolute;
-            bottom: 50%;
-            left: 50%;
-            transform-origin: bottom center;
-            border-radius: 4px 4px 0 0;
-        }
-        
-        .minute-hand {
-            width: 6px;
-            height: 120px;
-            background: #667eea;
-            position: absolute;
-            bottom: 50%;
-            left: 50%;
-            transform-origin: bottom center;
-            border-radius: 3px 3px 0 0;
-        }
-        
-        .clock-number {
-            position: absolute;
-            font-size: 24px;
-            font-weight: bold;
-            color: #333;
-        }
-        
-        .clock-tick {
-            position: absolute;
-            width: 2px;
-            height: 10px;
-            background: #999;
-            left: 50%;
-            transform-origin: center 150px;
-        }
-        
-        .clock-tick.major {
-            height: 20px;
-            width: 3px;
-            background: #333;
         }
         
         .time-input-container {
@@ -288,16 +235,13 @@
                 height: 250px;
             }
             
-            .hour-hand {
-                height: 65px;
+            #clockCanvas {
+                width: 250px;
+                height: 250px;
             }
             
-            .minute-hand {
-                height: 100px;
-            }
-            
-            .clock-tick {
-                transform-origin: center 125px;
+            .clock-number {
+                font-size: 20px;
             }
         }
     </style>
@@ -309,7 +253,9 @@
         
         <div class="question-text" id="questionText">What time is shown on the clock?</div>
         
-        <div class="analog-clock" id="analogClock"></div>
+        <div class="analog-clock">
+            <canvas id="clockCanvas" width="300" height="300"></canvas>
+        </div>
         
         <div class="time-input-container">
             <div class="time-digit-box active" id="hourBox1"></div>
@@ -367,47 +313,90 @@
 
         const rand = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
 
-        function createClock() {
-            const clock = document.getElementById('analogClock');
-            let ticksHtml = '';
+        function drawClock(hour, minutes) {
+            const canvas = document.getElementById('clockCanvas');
+            const ctx = canvas.getContext('2d');
+            const radius = canvas.width / 2;
             
-            // Create tick marks
+            // Clear canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Draw clock face
+            ctx.beginPath();
+            ctx.arc(radius, radius, radius - 10, 0, 2 * Math.PI);
+            ctx.fillStyle = 'white';
+            ctx.fill();
+            
+            // Draw tick marks
             for (let i = 0; i < 60; i++) {
-                const angle = i * 6;
+                const angle = (i * 6) * Math.PI / 180;
                 const isMajor = i % 5 === 0;
-                ticksHtml += `<div class="clock-tick ${isMajor ? 'major' : ''}" style="transform: translateX(-50%) rotate(${angle}deg);"></div>`;
+                
+                ctx.beginPath();
+                const startRadius = isMajor ? radius - 30 : radius - 20;
+                const endRadius = radius - 10;
+                
+                ctx.moveTo(
+                    radius + startRadius * Math.sin(angle),
+                    radius - startRadius * Math.cos(angle)
+                );
+                ctx.lineTo(
+                    radius + endRadius * Math.sin(angle),
+                    radius - endRadius * Math.cos(angle)
+                );
+                
+                ctx.strokeStyle = isMajor ? '#333' : '#999';
+                ctx.lineWidth = isMajor ? 3 : 2;
+                ctx.stroke();
             }
             
-            clock.innerHTML = ticksHtml;
+            // Draw numbers
+            ctx.font = 'bold 24px Arial';
+            ctx.fillStyle = '#333';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
             
-            // Add clock numbers
-            const numbers = [12, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11];
-            numbers.forEach((num, index) => {
-                const angle = (index * 30 - 90) * (Math.PI / 180);
-                const radius = 120;
-                const x = 150 + radius * Math.cos(angle);
-                const y = 150 + radius * Math.sin(angle);
-                
-                const numberDiv = document.createElement('div');
-                numberDiv.className = 'clock-number';
-                numberDiv.textContent = num;
-                numberDiv.style.left = (x - 12) + 'px';
-                numberDiv.style.top = (y - 12) + 'px';
-                clock.appendChild(numberDiv);
-            });
+            for (let i = 1; i <= 12; i++) {
+                const angle = (i * 30 - 90) * Math.PI / 180;
+                const numberRadius = radius - 50;
+                const x = radius + numberRadius * Math.cos(angle);
+                const y = radius + numberRadius * Math.sin(angle);
+                ctx.fillText(i.toString(), x, y);
+            }
             
-            // Add hands
-            clock.innerHTML += '<div class="hour-hand" id="hourHand"></div>';
-            clock.innerHTML += '<div class="minute-hand" id="minuteHand"></div>';
-            clock.innerHTML += '<div class="clock-center"></div>';
-        }
-
-        function updateClock(hour, minutes) {
-            const minuteAngle = (minutes / 60) * 360;
-            const hourAngle = ((hour % 12) / 12) * 360 + (minutes / 60) * 30;
+            // Calculate angles
+            const minuteAngle = (minutes / 60) * 2 * Math.PI - Math.PI / 2;
+            const hourAngle = ((hour % 12) / 12) * 2 * Math.PI + (minutes / 60) * (Math.PI / 6) - Math.PI / 2;
             
-            document.getElementById('hourHand').style.transform = `translateX(-50%) rotate(${hourAngle}deg)`;
-            document.getElementById('minuteHand').style.transform = `translateX(-50%) rotate(${minuteAngle}deg)`;
+            // Draw hour hand
+            ctx.beginPath();
+            ctx.moveTo(radius, radius);
+            ctx.lineTo(
+                radius + 80 * Math.cos(hourAngle),
+                radius + 80 * Math.sin(hourAngle)
+            );
+            ctx.strokeStyle = '#333';
+            ctx.lineWidth = 8;
+            ctx.lineCap = 'round';
+            ctx.stroke();
+            
+            // Draw minute hand
+            ctx.beginPath();
+            ctx.moveTo(radius, radius);
+            ctx.lineTo(
+                radius + 120 * Math.cos(minuteAngle),
+                radius + 120 * Math.sin(minuteAngle)
+            );
+            ctx.strokeStyle = '#667eea';
+            ctx.lineWidth = 6;
+            ctx.lineCap = 'round';
+            ctx.stroke();
+            
+            // Draw center dot
+            ctx.beginPath();
+            ctx.arc(radius, radius, 8, 0, 2 * Math.PI);
+            ctx.fillStyle = '#333';
+            ctx.fill();
         }
 
         function updateBoxes() {
@@ -458,7 +447,7 @@
             currentHour = rand(1, 12);
             currentMinutes = rand(0, 11) * 5;
             
-            updateClock(currentHour, currentMinutes);
+            drawClock(currentHour, currentMinutes);
             
             timeValues = ['', '', '', ''];
             currentBox = 0;
@@ -520,7 +509,6 @@
         }
 
         // Initialize
-        createClock();
         nextQuestion();
     </script>
 </body>
