@@ -117,8 +117,7 @@
         }
         
         #digitBoxContainer:focus {
-            outline: 2px dashed #667eea;
-            outline-offset: 5px;
+            outline: none;
         }
         
         .digit-box {
@@ -654,7 +653,6 @@
                 // Focus after a brief delay to ensure DOM is ready
                 setTimeout(() => {
                     digitBoxContainer.focus();
-                    console.log('Focused on digit container');
                 }, 150);
             } else {
                 oddEvenButtons.style.display = 'none';
@@ -678,7 +676,7 @@
                 Array(numDigits).fill(0).map((_, i) => 
                     `<div class="digit-box" id="digitBox${i}"></div>`
                 ).join('') + 
-                '</div><p style="color: #666; font-size: 0.9em; margin-top: 10px;">Click here and type your answer</p>';
+                '</div>';
             
             updateDigitBoxes();
             
@@ -686,8 +684,6 @@
             container.onclick = function() {
                 container.focus();
             };
-            
-            console.log('Created digit boxes, numDigits:', numDigits, 'currentIndex:', currentDigitIndex);
         }
         
         function updateDigitBoxes() {
@@ -710,7 +706,6 @@
             if (answered || (type !== 'addition' && type !== 'subtraction')) return;
             
             const key = event.key;
-            console.log('Key pressed:', key, 'Current index:', currentDigitIndex);
             
             // Handle number input
             if (key >= '0' && key <= '9') {
