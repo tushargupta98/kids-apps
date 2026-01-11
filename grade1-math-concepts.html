@@ -1,1 +1,442 @@
 
+import React, { useState, useEffect } from 'react';
+import { Check, X, ArrowRight, RotateCcw, Star } from 'lucide-react';
+
+const InteractiveMathPractice = () => {
+  const [selectedType, setSelectedType] = useState(null);
+  const [currentQuestion, setCurrentQuestion] = useState(null);
+  const [userAnswer, setUserAnswer] = useState('');
+  const [showFeedback, setShowFeedback] = useState(false);
+  const [isCorrect, setIsCorrect] = useState(false);
+  const [score, setScore] = useState(0);
+  const [questionsAnswered, setQuestionsAnswered] = useState(0);
+
+  const rand = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
+  const randEven = (min, max) => {
+    const num = rand(min, max);
+    return num % 2 === 0 ? num : num + 1;
+  };
+
+  const questionTypes = [
+    { id: 'add100', name: 'Addition within 100', icon: '➕' },
+    { id: 'sub100', name: 'Subtraction within 100', icon: '➖' },
+    { id: 'skip2', name: 'Skip Counting by 2s', icon: '2️⃣' },
+    { id: 'skip5', name: 'Skip Counting by 5s', icon: '5️⃣' },
+    { id: 'skip10', name: 'Skip Counting by 10s', icon: '🔟' },
+    { id: 'skip3', name: 'Skip Counting by 3s', icon: '3️⃣' },
+    { id: 'pv10more', name: '10 More', icon: '⬆️' },
+    { id: 'pv10less', name: '10 Less', icon: '⬇️' },
+    { id: 'missadd', name: 'Missing Addend', icon: '❓' },
+    { id: 'misssub', name: 'Missing Subtrahend', icon: '🔍' },
+    { id: 'compare', name: 'Number Comparison', icon: '⚖️' },
+    { id: 'repeat', name: 'Repeated Addition', icon: '✖️' },
+    { id: 'wordadd', name: 'Word Problem - Add', icon: '📝' },
+    { id: 'wordsub', name: 'Word Problem - Subtract', icon: '📖' },
+    { id: 'twostep', name: 'Two-Step Problem', icon: '🎯' },
+    { id: 'pattern', name: 'Number Pattern', icon: '🔢' },
+    { id: 'oddeven', name: 'Odd or Even', icon: '🎲' },
+    { id: 'gtlt', name: 'Greater/Less Than', icon: '◀️▶️' },
+    { id: 'coins', name: 'Counting Coins', icon: '💰' },
+    { id: 'time', name: 'Telling Time', icon: '🕐' },
+    { id: 'measure', name: 'Measurement', icon: '📏' },
+    { id: 'half', name: 'Fractions - Halves', icon: '½' },
+    { id: 'quarter', name: 'Fractions - Quarters', icon: '¼' },
+    { id: 'shapes', name: 'Shape Sides', icon: '🔺' },
+    { id: 'perimeter', name: 'Perimeter', icon: '📐' },
+    { id: 'estimate', name: 'Estimation', icon: '🎯' },
+    { id: 'round', name: 'Rounding to 10', icon: '🔄' },
+    { id: 'inverse', name: 'Inverse Operations', icon: '↔️' },
+    { id: 'make10', name: 'Making 10', icon: '🎪' },
+    { id: 'doubles', name: 'Doubles', icon: '👯' }
+  ];
+
+  const generateQuestion = (typeId) => {
+    let question = '';
+    let answer = '';
+    
+    switch(typeId) {
+      case 'add100': {
+        const a = rand(10, 89);
+        const b = rand(10, 100 - a);
+        question = `${a} + ${b}`;
+        answer = (a + b).toString();
+        break;
+      }
+      case 'sub100': {
+        const a = rand(20, 100);
+        const b = rand(10, a - 10);
+        question = `${a} - ${b}`;
+        answer = (a - b).toString();
+        break;
+      }
+      case 'skip2': {
+        const start = randEven(2, 20);
+        question = `Count by 2s: ${start}, ${start+2}, ${start+4}, ?`;
+        answer = (start + 6).toString();
+        break;
+      }
+      case 'skip5': {
+        const start = rand(0, 10) * 5;
+        question = `Count by 5s: ${start}, ${start+5}, ${start+10}, ?`;
+        answer = (start + 15).toString();
+        break;
+      }
+      case 'skip10': {
+        const start = rand(0, 5) * 10;
+        question = `Count by 10s: ${start}, ${start+10}, ${start+20}, ?`;
+        answer = (start + 30).toString();
+        break;
+      }
+      case 'skip3': {
+        const start = rand(0, 5) * 3;
+        question = `Count by 3s: ${start}, ${start+3}, ${start+6}, ?`;
+        answer = (start + 9).toString();
+        break;
+      }
+      case 'pv10more': {
+        const num = rand(20, 89);
+        question = `What is 10 more than ${num}?`;
+        answer = (num + 10).toString();
+        break;
+      }
+      case 'pv10less': {
+        const num = rand(20, 99);
+        question = `What is 10 less than ${num}?`;
+        answer = (num - 10).toString();
+        break;
+      }
+      case 'missadd': {
+        const a = rand(10, 50);
+        const b = rand(10, 40);
+        question = `${a} + ? = ${a + b}`;
+        answer = b.toString();
+        break;
+      }
+      case 'misssub': {
+        const a = rand(30, 80);
+        const b = rand(10, 30);
+        question = `${a} - ? = ${a - b}`;
+        answer = b.toString();
+        break;
+      }
+      case 'compare': {
+        const a = rand(20, 99);
+        const b = rand(20, 99);
+        question = `Which is greater: ${a} or ${b}?`;
+        answer = (a > b ? a : b).toString();
+        break;
+      }
+      case 'repeat': {
+        const groups = rand(2, 5);
+        const perGroup = rand(3, 8);
+        question = `${groups} groups of ${perGroup}`;
+        answer = (groups * perGroup).toString();
+        break;
+      }
+      case 'wordadd': {
+        const a = rand(15, 50);
+        const b = rand(10, 40);
+        const items = ['stickers', 'marbles', 'pencils', 'books', 'toys'][rand(0, 4)];
+        question = `Sam has ${a} ${items}. He gets ${b} more. How many total?`;
+        answer = (a + b).toString();
+        break;
+      }
+      case 'wordsub': {
+        const a = rand(30, 70);
+        const b = rand(10, 30);
+        const items = ['candies', 'cards', 'coins', 'crayons'][rand(0, 3)];
+        question = `Emma has ${a} ${items}. She gives away ${b}. How many left?`;
+        answer = (a - b).toString();
+        break;
+      }
+      case 'twostep': {
+        const a = rand(10, 30);
+        const b = rand(5, 20);
+        const c = rand(5, 15);
+        question = `Jake had ${a} apples. He got ${b} more, then ate ${c}. How many left?`;
+        answer = (a + b - c).toString();
+        break;
+      }
+      case 'pattern': {
+        const diff = [2, 3, 5, 10][rand(0, 3)];
+        const start = rand(1, 20);
+        question = `Complete: ${start}, ${start+diff}, ${start+diff*2}, ?`;
+        answer = (start + diff * 3).toString();
+        break;
+      }
+      case 'oddeven': {
+        const num = rand(10, 99);
+        question = `Is ${num} odd or even?`;
+        answer = num % 2 === 0 ? 'even' : 'odd';
+        break;
+      }
+      case 'gtlt': {
+        const a = rand(20, 80);
+        const b = rand(20, 80);
+        question = `${a} ? ${b} (> or <)`;
+        answer = a > b ? '>' : '<';
+        break;
+      }
+      case 'coins': {
+        const pennies = rand(0, 10);
+        const nickels = rand(0, 5);
+        question = `${pennies} pennies + ${nickels} nickels = ? cents`;
+        answer = (pennies + nickels * 5).toString();
+        break;
+      }
+      case 'time': {
+        const hour = rand(1, 12);
+        question = `What hour is ${hour}:00?`;
+        answer = hour.toString();
+        break;
+      }
+      case 'measure': {
+        const a = rand(5, 20);
+        const b = rand(5, 20);
+        question = `Pencil: ${a} cm, Eraser: ${b} cm. How much longer is the pencil?`;
+        answer = Math.abs(a - b).toString();
+        break;
+      }
+      case 'half': {
+        const total = randEven(4, 20);
+        question = `Half of ${total}`;
+        answer = (total / 2).toString();
+        break;
+      }
+      case 'quarter': {
+        const total = [4, 8, 12, 16, 20][rand(0, 4)];
+        question = `One quarter of ${total}`;
+        answer = (total / 4).toString();
+        break;
+      }
+      case 'shapes': {
+        const shapes = [
+          { name: 'triangle', sides: 3 },
+          { name: 'square', sides: 4 },
+          { name: 'pentagon', sides: 5 },
+          { name: 'hexagon', sides: 6 }
+        ];
+        const shape = shapes[rand(0, shapes.length - 1)];
+        question = `How many sides does a ${shape.name} have?`;
+        answer = shape.sides.toString();
+        break;
+      }
+      case 'perimeter': {
+        const l = rand(3, 10);
+        const w = rand(3, 10);
+        question = `Rectangle: length=${l}, width=${w}. Perimeter?`;
+        answer = ((l + w) * 2).toString();
+        break;
+      }
+      case 'estimate': {
+        const a = rand(20, 45);
+        const b = rand(20, 45);
+        const sum = a + b;
+        const closest = Math.round(sum / 10) * 10;
+        question = `${a} + ${b} is closest to: 40, 60, or 80?`;
+        answer = closest.toString();
+        break;
+      }
+      case 'round': {
+        const num = rand(22, 88);
+        question = `Round ${num} to nearest ten`;
+        answer = (Math.round(num / 10) * 10).toString();
+        break;
+      }
+      case 'inverse': {
+        const a = rand(5, 15);
+        const b = rand(5, 15);
+        question = `If ${a} + ${b} = ${a + b}, then ${a + b} - ${a} = ?`;
+        answer = b.toString();
+        break;
+      }
+      case 'make10': {
+        const num = rand(1, 9);
+        question = `${num} + ? = 10`;
+        answer = (10 - num).toString();
+        break;
+      }
+      case 'doubles': {
+        const num = rand(5, 20);
+        question = `Double ${num}`;
+        answer = (num * 2).toString();
+        break;
+      }
+    }
+    
+    return { question, answer };
+  };
+
+  const loadNewQuestion = () => {
+    if (selectedType) {
+      const q = generateQuestion(selectedType);
+      setCurrentQuestion(q);
+      setUserAnswer('');
+      setShowFeedback(false);
+    }
+  };
+
+  useEffect(() => {
+    loadNewQuestion();
+  }, [selectedType]);
+
+  const checkAnswer = () => {
+    if (!userAnswer.trim()) return;
+    
+    const correct = userAnswer.toLowerCase().trim() === currentQuestion.answer.toLowerCase().trim();
+    setIsCorrect(correct);
+    setShowFeedback(true);
+    setQuestionsAnswered(prev => prev + 1);
+    if (correct) setScore(prev => prev + 1);
+  };
+
+  const nextQuestion = () => {
+    loadNewQuestion();
+  };
+
+  const resetProgress = () => {
+    setScore(0);
+    setQuestionsAnswered(0);
+    loadNewQuestion();
+  };
+
+  if (!selectedType) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-purple-100 via-pink-100 to-blue-100 p-6">
+        <div className="max-w-5xl mx-auto">
+          <div className="text-center mb-8">
+            <h1 className="text-4xl font-bold text-purple-800 mb-2">Math Practice Time! 🎓</h1>
+            <p className="text-lg text-gray-700">Choose a question type to practice</p>
+          </div>
+          
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            {questionTypes.map(type => (
+              <button
+                key={type.id}
+                onClick={() => setSelectedType(type.id)}
+                className="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 border-2 border-purple-200 hover:border-purple-400"
+              >
+                <div className="text-4xl mb-2">{type.icon}</div>
+                <div className="text-sm font-semibold text-gray-800">{type.name}</div>
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  const currentTypeName = questionTypes.find(t => t.id === selectedType)?.name;
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-blue-100 via-purple-100 to-pink-100 p-6">
+      <div className="max-w-3xl mx-auto">
+        <div className="bg-white rounded-2xl shadow-2xl p-8">
+          <div className="flex justify-between items-center mb-6">
+            <button
+              onClick={() => {
+                setSelectedType(null);
+                setScore(0);
+                setQuestionsAnswered(0);
+              }}
+              className="text-purple-600 hover:text-purple-800 font-semibold"
+            >
+              ← Back to Menu
+            </button>
+            <div className="flex items-center gap-4">
+              <div className="text-right">
+                <div className="text-sm text-gray-600">Score</div>
+                <div className="text-2xl font-bold text-purple-800">{score}/{questionsAnswered}</div>
+              </div>
+              <button
+                onClick={resetProgress}
+                className="p-2 hover:bg-gray-100 rounded-lg transition"
+                title="Reset score"
+              >
+                <RotateCcw size={20} className="text-gray-600" />
+              </button>
+            </div>
+          </div>
+
+          <div className="text-center mb-8">
+            <h2 className="text-3xl font-bold text-purple-800 mb-2">{currentTypeName}</h2>
+            {questionsAnswered > 0 && (
+              <div className="flex justify-center gap-1">
+                {Array.from({ length: Math.min(questionsAnswered, 10) }).map((_, i) => (
+                  <Star key={i} size={16} className="text-yellow-400 fill-yellow-400" />
+                ))}
+              </div>
+            )}
+          </div>
+
+          {currentQuestion && (
+            <div className="space-y-6">
+              <div className="bg-gradient-to-r from-purple-50 to-blue-50 p-8 rounded-xl border-2 border-purple-200">
+                <div className="text-2xl font-bold text-center text-gray-800 leading-relaxed">
+                  {currentQuestion.question}
+                </div>
+              </div>
+
+              {!showFeedback ? (
+                <div className="space-y-4">
+                  <input
+                    type="text"
+                    value={userAnswer}
+                    onChange={(e) => setUserAnswer(e.target.value)}
+                    onKeyPress={(e) => e.key === 'Enter' && checkAnswer()}
+                    placeholder="Type your answer here..."
+                    className="w-full text-3xl text-center p-6 border-4 border-purple-300 rounded-xl focus:border-purple-500 focus:outline-none font-bold"
+                    autoFocus
+                  />
+                  <button
+                    onClick={checkAnswer}
+                    disabled={!userAnswer.trim()}
+                    className="w-full bg-purple-600 text-white text-xl font-bold py-4 rounded-xl hover:bg-purple-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition transform hover:scale-105"
+                  >
+                    Check Answer
+                  </button>
+                </div>
+              ) : (
+                <div className={`p-8 rounded-xl ${isCorrect ? 'bg-green-100 border-4 border-green-400' : 'bg-red-100 border-4 border-red-400'}`}>
+                  <div className="flex items-center justify-center gap-4 mb-4">
+                    {isCorrect ? (
+                      <>
+                        <Check size={48} className="text-green-600" />
+                        <div className="text-3xl font-bold text-green-800">Correct! 🎉</div>
+                      </>
+                    ) : (
+                      <>
+                        <X size={48} className="text-red-600" />
+                        <div className="text-3xl font-bold text-red-800">Not quite!</div>
+                      </>
+                    )}
+                  </div>
+                  
+                  {!isCorrect && (
+                    <div className="text-center mb-4">
+                      <div className="text-lg text-gray-700">The correct answer is:</div>
+                      <div className="text-4xl font-bold text-blue-800 mt-2">{currentQuestion.answer}</div>
+                    </div>
+                  )}
+
+                  <button
+                    onClick={nextQuestion}
+                    className="w-full bg-blue-600 text-white text-xl font-bold py-4 rounded-xl hover:bg-blue-700 transition flex items-center justify-center gap-2 transform hover:scale-105"
+                  >
+                    Next Question <ArrowRight size={24} />
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+
+        <div className="mt-6 text-center text-sm text-gray-600">
+          💡 Tip: Press Enter to check your answer quickly!
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default InteractiveMathPractice;
