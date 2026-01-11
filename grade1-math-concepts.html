@@ -421,14 +421,14 @@
                 case 'addition':
                     const a1 = rand(10, 89);
                     const a2 = rand(10, 100 - a1);
-                    question = `<div class="vertical-math">  ${a1}<br>+ ${a2}<br><div class="operator">____</div></div>`;
+                    question = `<div class="vertical-math">  ${a1}<br>+ ${a2}</div>`;
                     answer = (a1 + a2).toString();
                     break;
                     
                 case 'subtraction':
                     const s1 = rand(20, 100);
                     const s2 = rand(10, s1 - 10);
-                    question = `<div class="vertical-math">  ${s1}<br>- ${s2}<br><div class="operator">____</div></div>`;
+                    question = `<div class="vertical-math">  ${s1}<br>- ${s2}</div>`;
                     answer = (s1 - s2).toString();
                     break;
                     
