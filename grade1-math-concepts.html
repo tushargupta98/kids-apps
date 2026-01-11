@@ -1,442 +1,623 @@
-
-import React, { useState, useEffect } from 'react';
-import { Check, X, ArrowRight, RotateCcw, Star } from 'lucide-react';
-
-const InteractiveMathPractice = () => {
-  const [selectedType, setSelectedType] = useState(null);
-  const [currentQuestion, setCurrentQuestion] = useState(null);
-  const [userAnswer, setUserAnswer] = useState('');
-  const [showFeedback, setShowFeedback] = useState(false);
-  const [isCorrect, setIsCorrect] = useState(false);
-  const [score, setScore] = useState(0);
-  const [questionsAnswered, setQuestionsAnswered] = useState(0);
-
-  const rand = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
-  const randEven = (min, max) => {
-    const num = rand(min, max);
-    return num % 2 === 0 ? num : num + 1;
-  };
-
-  const questionTypes = [
-    { id: 'add100', name: 'Addition within 100', icon: '➕' },
-    { id: 'sub100', name: 'Subtraction within 100', icon: '➖' },
-    { id: 'skip2', name: 'Skip Counting by 2s', icon: '2️⃣' },
-    { id: 'skip5', name: 'Skip Counting by 5s', icon: '5️⃣' },
-    { id: 'skip10', name: 'Skip Counting by 10s', icon: '🔟' },
-    { id: 'skip3', name: 'Skip Counting by 3s', icon: '3️⃣' },
-    { id: 'pv10more', name: '10 More', icon: '⬆️' },
-    { id: 'pv10less', name: '10 Less', icon: '⬇️' },
-    { id: 'missadd', name: 'Missing Addend', icon: '❓' },
-    { id: 'misssub', name: 'Missing Subtrahend', icon: '🔍' },
-    { id: 'compare', name: 'Number Comparison', icon: '⚖️' },
-    { id: 'repeat', name: 'Repeated Addition', icon: '✖️' },
-    { id: 'wordadd', name: 'Word Problem - Add', icon: '📝' },
-    { id: 'wordsub', name: 'Word Problem - Subtract', icon: '📖' },
-    { id: 'twostep', name: 'Two-Step Problem', icon: '🎯' },
-    { id: 'pattern', name: 'Number Pattern', icon: '🔢' },
-    { id: 'oddeven', name: 'Odd or Even', icon: '🎲' },
-    { id: 'gtlt', name: 'Greater/Less Than', icon: '◀️▶️' },
-    { id: 'coins', name: 'Counting Coins', icon: '💰' },
-    { id: 'time', name: 'Telling Time', icon: '🕐' },
-    { id: 'measure', name: 'Measurement', icon: '📏' },
-    { id: 'half', name: 'Fractions - Halves', icon: '½' },
-    { id: 'quarter', name: 'Fractions - Quarters', icon: '¼' },
-    { id: 'shapes', name: 'Shape Sides', icon: '🔺' },
-    { id: 'perimeter', name: 'Perimeter', icon: '📐' },
-    { id: 'estimate', name: 'Estimation', icon: '🎯' },
-    { id: 'round', name: 'Rounding to 10', icon: '🔄' },
-    { id: 'inverse', name: 'Inverse Operations', icon: '↔️' },
-    { id: 'make10', name: 'Making 10', icon: '🎪' },
-    { id: 'doubles', name: 'Doubles', icon: '👯' }
-  ];
-
-  const generateQuestion = (typeId) => {
-    let question = '';
-    let answer = '';
-    
-    switch(typeId) {
-      case 'add100': {
-        const a = rand(10, 89);
-        const b = rand(10, 100 - a);
-        question = `${a} + ${b}`;
-        answer = (a + b).toString();
-        break;
-      }
-      case 'sub100': {
-        const a = rand(20, 100);
-        const b = rand(10, a - 10);
-        question = `${a} - ${b}`;
-        answer = (a - b).toString();
-        break;
-      }
-      case 'skip2': {
-        const start = randEven(2, 20);
-        question = `Count by 2s: ${start}, ${start+2}, ${start+4}, ?`;
-        answer = (start + 6).toString();
-        break;
-      }
-      case 'skip5': {
-        const start = rand(0, 10) * 5;
-        question = `Count by 5s: ${start}, ${start+5}, ${start+10}, ?`;
-        answer = (start + 15).toString();
-        break;
-      }
-      case 'skip10': {
-        const start = rand(0, 5) * 10;
-        question = `Count by 10s: ${start}, ${start+10}, ${start+20}, ?`;
-        answer = (start + 30).toString();
-        break;
-      }
-      case 'skip3': {
-        const start = rand(0, 5) * 3;
-        question = `Count by 3s: ${start}, ${start+3}, ${start+6}, ?`;
-        answer = (start + 9).toString();
-        break;
-      }
-      case 'pv10more': {
-        const num = rand(20, 89);
-        question = `What is 10 more than ${num}?`;
-        answer = (num + 10).toString();
-        break;
-      }
-      case 'pv10less': {
-        const num = rand(20, 99);
-        question = `What is 10 less than ${num}?`;
-        answer = (num - 10).toString();
-        break;
-      }
-      case 'missadd': {
-        const a = rand(10, 50);
-        const b = rand(10, 40);
-        question = `${a} + ? = ${a + b}`;
-        answer = b.toString();
-        break;
-      }
-      case 'misssub': {
-        const a = rand(30, 80);
-        const b = rand(10, 30);
-        question = `${a} - ? = ${a - b}`;
-        answer = b.toString();
-        break;
-      }
-      case 'compare': {
-        const a = rand(20, 99);
-        const b = rand(20, 99);
-        question = `Which is greater: ${a} or ${b}?`;
-        answer = (a > b ? a : b).toString();
-        break;
-      }
-      case 'repeat': {
-        const groups = rand(2, 5);
-        const perGroup = rand(3, 8);
-        question = `${groups} groups of ${perGroup}`;
-        answer = (groups * perGroup).toString();
-        break;
-      }
-      case 'wordadd': {
-        const a = rand(15, 50);
-        const b = rand(10, 40);
-        const items = ['stickers', 'marbles', 'pencils', 'books', 'toys'][rand(0, 4)];
-        question = `Sam has ${a} ${items}. He gets ${b} more. How many total?`;
-        answer = (a + b).toString();
-        break;
-      }
-      case 'wordsub': {
-        const a = rand(30, 70);
-        const b = rand(10, 30);
-        const items = ['candies', 'cards', 'coins', 'crayons'][rand(0, 3)];
-        question = `Emma has ${a} ${items}. She gives away ${b}. How many left?`;
-        answer = (a - b).toString();
-        break;
-      }
-      case 'twostep': {
-        const a = rand(10, 30);
-        const b = rand(5, 20);
-        const c = rand(5, 15);
-        question = `Jake had ${a} apples. He got ${b} more, then ate ${c}. How many left?`;
-        answer = (a + b - c).toString();
-        break;
-      }
-      case 'pattern': {
-        const diff = [2, 3, 5, 10][rand(0, 3)];
-        const start = rand(1, 20);
-        question = `Complete: ${start}, ${start+diff}, ${start+diff*2}, ?`;
-        answer = (start + diff * 3).toString();
-        break;
-      }
-      case 'oddeven': {
-        const num = rand(10, 99);
-        question = `Is ${num} odd or even?`;
-        answer = num % 2 === 0 ? 'even' : 'odd';
-        break;
-      }
-      case 'gtlt': {
-        const a = rand(20, 80);
-        const b = rand(20, 80);
-        question = `${a} ? ${b} (> or <)`;
-        answer = a > b ? '>' : '<';
-        break;
-      }
-      case 'coins': {
-        const pennies = rand(0, 10);
-        const nickels = rand(0, 5);
-        question = `${pennies} pennies + ${nickels} nickels = ? cents`;
-        answer = (pennies + nickels * 5).toString();
-        break;
-      }
-      case 'time': {
-        const hour = rand(1, 12);
-        question = `What hour is ${hour}:00?`;
-        answer = hour.toString();
-        break;
-      }
-      case 'measure': {
-        const a = rand(5, 20);
-        const b = rand(5, 20);
-        question = `Pencil: ${a} cm, Eraser: ${b} cm. How much longer is the pencil?`;
-        answer = Math.abs(a - b).toString();
-        break;
-      }
-      case 'half': {
-        const total = randEven(4, 20);
-        question = `Half of ${total}`;
-        answer = (total / 2).toString();
-        break;
-      }
-      case 'quarter': {
-        const total = [4, 8, 12, 16, 20][rand(0, 4)];
-        question = `One quarter of ${total}`;
-        answer = (total / 4).toString();
-        break;
-      }
-      case 'shapes': {
-        const shapes = [
-          { name: 'triangle', sides: 3 },
-          { name: 'square', sides: 4 },
-          { name: 'pentagon', sides: 5 },
-          { name: 'hexagon', sides: 6 }
-        ];
-        const shape = shapes[rand(0, shapes.length - 1)];
-        question = `How many sides does a ${shape.name} have?`;
-        answer = shape.sides.toString();
-        break;
-      }
-      case 'perimeter': {
-        const l = rand(3, 10);
-        const w = rand(3, 10);
-        question = `Rectangle: length=${l}, width=${w}. Perimeter?`;
-        answer = ((l + w) * 2).toString();
-        break;
-      }
-      case 'estimate': {
-        const a = rand(20, 45);
-        const b = rand(20, 45);
-        const sum = a + b;
-        const closest = Math.round(sum / 10) * 10;
-        question = `${a} + ${b} is closest to: 40, 60, or 80?`;
-        answer = closest.toString();
-        break;
-      }
-      case 'round': {
-        const num = rand(22, 88);
-        question = `Round ${num} to nearest ten`;
-        answer = (Math.round(num / 10) * 10).toString();
-        break;
-      }
-      case 'inverse': {
-        const a = rand(5, 15);
-        const b = rand(5, 15);
-        question = `If ${a} + ${b} = ${a + b}, then ${a + b} - ${a} = ?`;
-        answer = b.toString();
-        break;
-      }
-      case 'make10': {
-        const num = rand(1, 9);
-        question = `${num} + ? = 10`;
-        answer = (10 - num).toString();
-        break;
-      }
-      case 'doubles': {
-        const num = rand(5, 20);
-        question = `Double ${num}`;
-        answer = (num * 2).toString();
-        break;
-      }
-    }
-    
-    return { question, answer };
-  };
-
-  const loadNewQuestion = () => {
-    if (selectedType) {
-      const q = generateQuestion(selectedType);
-      setCurrentQuestion(q);
-      setUserAnswer('');
-      setShowFeedback(false);
-    }
-  };
-
-  useEffect(() => {
-    loadNewQuestion();
-  }, [selectedType]);
-
-  const checkAnswer = () => {
-    if (!userAnswer.trim()) return;
-    
-    const correct = userAnswer.toLowerCase().trim() === currentQuestion.answer.toLowerCase().trim();
-    setIsCorrect(correct);
-    setShowFeedback(true);
-    setQuestionsAnswered(prev => prev + 1);
-    if (correct) setScore(prev => prev + 1);
-  };
-
-  const nextQuestion = () => {
-    loadNewQuestion();
-  };
-
-  const resetProgress = () => {
-    setScore(0);
-    setQuestionsAnswered(0);
-    loadNewQuestion();
-  };
-
-  if (!selectedType) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-100 via-pink-100 to-blue-100 p-6">
-        <div className="max-w-5xl mx-auto">
-          <div className="text-center mb-8">
-            <h1 className="text-4xl font-bold text-purple-800 mb-2">Math Practice Time! 🎓</h1>
-            <p className="text-lg text-gray-700">Choose a question type to practice</p>
-          </div>
-          
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-            {questionTypes.map(type => (
-              <button
-                key={type.id}
-                onClick={() => setSelectedType(type.id)}
-                className="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 border-2 border-purple-200 hover:border-purple-400"
-              >
-                <div className="text-4xl mb-2">{type.icon}</div>
-                <div className="text-sm font-semibold text-gray-800">{type.name}</div>
-              </button>
-            ))}
-          </div>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Math Practice - Grade 1</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Comic Sans MS', 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 800px;
+            width: 100%;
+            padding: 40px;
+        }
+        
+        h1 {
+            color: #667eea;
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+        }
+        
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 1.1em;
+        }
+        
+        .question-type-selector {
+            margin-bottom: 30px;
+        }
+        
+        label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #333;
+            font-size: 1.1em;
+        }
+        
+        select {
+            width: 100%;
+            padding: 15px;
+            font-size: 1.1em;
+            border: 2px solid #667eea;
+            border-radius: 10px;
+            background: white;
+            cursor: pointer;
+        }
+        
+        .question-card {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            padding: 40px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            min-height: 200px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        
+        .question-text {
+            font-size: 1.8em;
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+        
+        .answer-input {
+            width: 100%;
+            padding: 20px;
+            font-size: 1.5em;
+            text-align: center;
+            border: 3px solid #667eea;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .answer-input:focus {
+            outline: none;
+            border-color: #764ba2;
+            box-shadow: 0 0 0 3px rgba(118, 75, 162, 0.1);
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        button {
+            flex: 1;
+            padding: 18px;
+            font-size: 1.2em;
+            font-weight: bold;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .check-btn {
+            background: #10b981;
+            color: white;
+        }
+        
+        .check-btn:hover {
+            background: #059669;
+            transform: translateY(-2px);
+        }
+        
+        .next-btn {
+            background: #667eea;
+            color: white;
+        }
+        
+        .next-btn:hover {
+            background: #764ba2;
+            transform: translateY(-2px);
+        }
+        
+        .skip-btn {
+            background: #f59e0b;
+            color: white;
+        }
+        
+        .skip-btn:hover {
+            background: #d97706;
+            transform: translateY(-2px);
+        }
+        
+        .feedback {
+            text-align: center;
+            font-size: 1.5em;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+        
+        .feedback.correct {
+            background: #d1fae5;
+            color: #065f46;
+        }
+        
+        .feedback.incorrect {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+        
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            background: #f3f4f6;
+            padding: 20px;
+            border-radius: 10px;
+        }
+        
+        .stat-item {
+            text-align: center;
+        }
+        
+        .stat-number {
+            font-size: 2em;
+            font-weight: bold;
+            color: #667eea;
+        }
+        
+        .stat-label {
+            color: #666;
+            margin-top: 5px;
+        }
+        
+        .celebration {
+            text-align: center;
+            font-size: 3em;
+            margin: 20px 0;
+        }
+        
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px;
+            }
+            
+            h1 {
+                font-size: 2em;
+            }
+            
+            .question-text {
+                font-size: 1.4em;
+            }
+            
+            button {
+                font-size: 1em;
+                padding: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎓 Math Practice</h1>
+        <p class="subtitle">Advanced Grade 1 • Interactive Learning</p>
+        
+        <div class="question-type-selector">
+            <label for="questionType">Choose a Question Type:</label>
+            <select id="questionType" onchange="startNewType()">
+                <option value="addition">Addition within 100</option>
+                <option value="subtraction">Subtraction within 100</option>
+                <option value="skip2">Skip Counting by 2s</option>
+                <option value="skip5">Skip Counting by 5s</option>
+                <option value="skip10">Skip Counting by 10s</option>
+                <option value="skip3">Skip Counting by 3s</option>
+                <option value="placeMore">Place Value - 10 More</option>
+                <option value="placeLess">Place Value - 10 Less</option>
+                <option value="missingAdd">Missing Addend</option>
+                <option value="missingSub">Missing Subtrahend</option>
+                <option value="compare">Number Comparison</option>
+                <option value="repeated">Repeated Addition</option>
+                <option value="wordAdd">Word Problem - Addition</option>
+                <option value="wordSub">Word Problem - Subtraction</option>
+                <option value="twoStep">Two-Step Word Problem</option>
+                <option value="pattern">Number Pattern</option>
+                <option value="oddEven">Odd or Even</option>
+                <option value="greaterLess">Greater or Less</option>
+                <option value="coins">Counting Coins</option>
+                <option value="timeHour">Time - Hour</option>
+                <option value="timeHalf">Time - Half Hour</option>
+                <option value="measurement">Measurement Comparison</option>
+                <option value="halves">Fractions - Halves</option>
+                <option value="quarters">Fractions - Quarters</option>
+                <option value="shapes">Shape Sides</option>
+                <option value="perimeter">Perimeter</option>
+                <option value="estimation">Estimation</option>
+                <option value="rounding">Rounding to Nearest 10</option>
+                <option value="inverse">Inverse Operations</option>
+                <option value="commutative">Commutative Property</option>
+                <option value="making10">Making 10</option>
+                <option value="doubles">Doubles</option>
+                <option value="nearDoubles">Near Doubles</option>
+            </select>
         </div>
-      </div>
-    );
-  }
-
-  const currentTypeName = questionTypes.find(t => t.id === selectedType)?.name;
-
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-100 via-purple-100 to-pink-100 p-6">
-      <div className="max-w-3xl mx-auto">
-        <div className="bg-white rounded-2xl shadow-2xl p-8">
-          <div className="flex justify-between items-center mb-6">
-            <button
-              onClick={() => {
-                setSelectedType(null);
-                setScore(0);
-                setQuestionsAnswered(0);
-              }}
-              className="text-purple-600 hover:text-purple-800 font-semibold"
-            >
-              ← Back to Menu
-            </button>
-            <div className="flex items-center gap-4">
-              <div className="text-right">
-                <div className="text-sm text-gray-600">Score</div>
-                <div className="text-2xl font-bold text-purple-800">{score}/{questionsAnswered}</div>
-              </div>
-              <button
-                onClick={resetProgress}
-                className="p-2 hover:bg-gray-100 rounded-lg transition"
-                title="Reset score"
-              >
-                <RotateCcw size={20} className="text-gray-600" />
-              </button>
+        
+        <div class="question-card">
+            <div class="question-text" id="questionText"></div>
+            <input type="text" id="answerInput" class="answer-input" placeholder="Type your answer here..." onkeypress="handleEnter(event)">
+        </div>
+        
+        <div id="feedback" class="feedback" style="display: none;"></div>
+        
+        <div class="button-group">
+            <button class="check-btn" onclick="checkAnswer()">✓ Check Answer</button>
+            <button class="next-btn" onclick="nextQuestion()">→ Next Question</button>
+            <button class="skip-btn" onclick="skipQuestion()">⇢ Skip</button>
+        </div>
+        
+        <div class="stats">
+            <div class="stat-item">
+                <div class="stat-number" id="correctCount">0</div>
+                <div class="stat-label">Correct</div>
             </div>
-          </div>
-
-          <div className="text-center mb-8">
-            <h2 className="text-3xl font-bold text-purple-800 mb-2">{currentTypeName}</h2>
-            {questionsAnswered > 0 && (
-              <div className="flex justify-center gap-1">
-                {Array.from({ length: Math.min(questionsAnswered, 10) }).map((_, i) => (
-                  <Star key={i} size={16} className="text-yellow-400 fill-yellow-400" />
-                ))}
-              </div>
-            )}
-          </div>
-
-          {currentQuestion && (
-            <div className="space-y-6">
-              <div className="bg-gradient-to-r from-purple-50 to-blue-50 p-8 rounded-xl border-2 border-purple-200">
-                <div className="text-2xl font-bold text-center text-gray-800 leading-relaxed">
-                  {currentQuestion.question}
-                </div>
-              </div>
-
-              {!showFeedback ? (
-                <div className="space-y-4">
-                  <input
-                    type="text"
-                    value={userAnswer}
-                    onChange={(e) => setUserAnswer(e.target.value)}
-                    onKeyPress={(e) => e.key === 'Enter' && checkAnswer()}
-                    placeholder="Type your answer here..."
-                    className="w-full text-3xl text-center p-6 border-4 border-purple-300 rounded-xl focus:border-purple-500 focus:outline-none font-bold"
-                    autoFocus
-                  />
-                  <button
-                    onClick={checkAnswer}
-                    disabled={!userAnswer.trim()}
-                    className="w-full bg-purple-600 text-white text-xl font-bold py-4 rounded-xl hover:bg-purple-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition transform hover:scale-105"
-                  >
-                    Check Answer
-                  </button>
-                </div>
-              ) : (
-                <div className={`p-8 rounded-xl ${isCorrect ? 'bg-green-100 border-4 border-green-400' : 'bg-red-100 border-4 border-red-400'}`}>
-                  <div className="flex items-center justify-center gap-4 mb-4">
-                    {isCorrect ? (
-                      <>
-                        <Check size={48} className="text-green-600" />
-                        <div className="text-3xl font-bold text-green-800">Correct! 🎉</div>
-                      </>
-                    ) : (
-                      <>
-                        <X size={48} className="text-red-600" />
-                        <div className="text-3xl font-bold text-red-800">Not quite!</div>
-                      </>
-                    )}
-                  </div>
-                  
-                  {!isCorrect && (
-                    <div className="text-center mb-4">
-                      <div className="text-lg text-gray-700">The correct answer is:</div>
-                      <div className="text-4xl font-bold text-blue-800 mt-2">{currentQuestion.answer}</div>
-                    </div>
-                  )}
-
-                  <button
-                    onClick={nextQuestion}
-                    className="w-full bg-blue-600 text-white text-xl font-bold py-4 rounded-xl hover:bg-blue-700 transition flex items-center justify-center gap-2 transform hover:scale-105"
-                  >
-                    Next Question <ArrowRight size={24} />
-                  </button>
-                </div>
-              )}
+            <div class="stat-item">
+                <div class="stat-number" id="totalCount">0</div>
+                <div class="stat-label">Attempted</div>
             </div>
-          )}
+            <div class="stat-item">
+                <div class="stat-number" id="streakCount">0</div>
+                <div class="stat-label">Streak</div>
+            </div>
         </div>
-
-        <div className="mt-6 text-center text-sm text-gray-600">
-          💡 Tip: Press Enter to check your answer quickly!
-        </div>
-      </div>
     </div>
-  );
-};
 
-export default InteractiveMathPractice;
+    <script>
+        let currentQuestion = {};
+        let correctAnswer = '';
+        let stats = { correct: 0, total: 0, streak: 0 };
+        let answered = false;
+
+        const rand = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
+        const randEven = (min, max) => {
+            let num = rand(min, max);
+            return num % 2 === 0 ? num : (num < max ? num + 1 : num - 1);
+        };
+
+        function generateQuestion(type) {
+            let question = '';
+            let answer = '';
+            
+            switch(type) {
+                case 'addition':
+                    const a1 = rand(10, 89);
+                    const a2 = rand(10, 100 - a1);
+                    question = `${a1} + ${a2} = ?`;
+                    answer = (a1 + a2).toString();
+                    break;
+                    
+                case 'subtraction':
+                    const s1 = rand(20, 100);
+                    const s2 = rand(10, s1 - 10);
+                    question = `${s1} - ${s2} = ?`;
+                    answer = (s1 - s2).toString();
+                    break;
+                    
+                case 'skip2':
+                    const start2 = randEven(2, 20);
+                    question = `Count by 2s: ${start2}, ${start2+2}, ${start2+4}, ?, ?, ?`;
+                    answer = `${start2+6}, ${start2+8}, ${start2+10}`;
+                    break;
+                    
+                case 'skip5':
+                    const start5 = rand(0, 10) * 5;
+                    question = `Count by 5s: ${start5}, ${start5+5}, ${start5+10}, ?, ?, ?`;
+                    answer = `${start5+15}, ${start5+20}, ${start5+25}`;
+                    break;
+                    
+                case 'skip10':
+                    const start10 = rand(0, 5) * 10;
+                    question = `Count by 10s: ${start10}, ${start10+10}, ${start10+20}, ?, ?, ?`;
+                    answer = `${start10+30}, ${start10+40}, ${start10+50}`;
+                    break;
+                    
+                case 'skip3':
+                    const start3 = rand(0, 5) * 3;
+                    question = `Count by 3s: ${start3}, ${start3+3}, ${start3+6}, ?, ?, ?`;
+                    answer = `${start3+9}, ${start3+12}, ${start3+15}`;
+                    break;
+                    
+                case 'placeMore':
+                    const pv1 = rand(20, 89);
+                    question = `What is 10 more than ${pv1}?`;
+                    answer = (pv1 + 10).toString();
+                    break;
+                    
+                case 'placeLess':
+                    const pv2 = rand(20, 99);
+                    question = `What is 10 less than ${pv2}?`;
+                    answer = (pv2 - 10).toString();
+                    break;
+                    
+                case 'missingAdd':
+                    const ma1 = rand(10, 50);
+                    const ma2 = rand(10, 40);
+                    question = `${ma1} + ? = ${ma1 + ma2}`;
+                    answer = ma2.toString();
+                    break;
+                    
+                case 'missingSub':
+                    const ms1 = rand(30, 80);
+                    const ms2 = rand(10, 30);
+                    question = `${ms1} - ? = ${ms1 - ms2}`;
+                    answer = ms2.toString();
+                    break;
+                    
+                case 'compare':
+                    const nc1 = rand(20, 99);
+                    const nc2 = rand(20, 99);
+                    question = `Which is greater: ${nc1} or ${nc2}?`;
+                    answer = nc1 > nc2 ? nc1.toString() : nc2.toString();
+                    break;
+                    
+                case 'repeated':
+                    const groups = rand(2, 5);
+                    const perGroup = rand(3, 8);
+                    question = `${groups} groups of ${perGroup}. How many total?`;
+                    answer = (groups * perGroup).toString();
+                    break;
+                    
+                case 'wordAdd':
+                    const wp1 = rand(15, 50);
+                    const wp2 = rand(10, 40);
+                    const items = ['stickers', 'marbles', 'pencils', 'books', 'toys'][rand(0, 4)];
+                    question = `Sam has ${wp1} ${items}. He gets ${wp2} more. How many does he have now?`;
+                    answer = (wp1 + wp2).toString();
+                    break;
+                    
+                case 'wordSub':
+                    const wp3 = rand(30, 70);
+                    const wp4 = rand(10, 30);
+                    const items2 = ['candies', 'cards', 'coins', 'crayons', 'blocks'][rand(0, 4)];
+                    question = `Emma has ${wp3} ${items2}. She gives away ${wp4}. How many are left?`;
+                    answer = (wp3 - wp4).toString();
+                    break;
+                    
+                case 'twoStep':
+                    const ts1 = rand(10, 30);
+                    const ts2 = rand(5, 20);
+                    const ts3 = rand(5, 15);
+                    question = `Jake had ${ts1} apples. He got ${ts2} more, then ate ${ts3}. How many apples does he have?`;
+                    answer = (ts1 + ts2 - ts3).toString();
+                    break;
+                    
+                case 'pattern':
+                    const diff = [2, 3, 4, 5, 10][rand(0, 4)];
+                    const np1 = rand(1, 20);
+                    question = `Complete the pattern: ${np1}, ${np1+diff}, ${np1+diff*2}, ?, ?, ?`;
+                    answer = `${np1+diff*3}, ${np1+diff*4}, ${np1+diff*5}`;
+                    break;
+                    
+                case 'oddEven':
+                    const oe = rand(10, 99);
+                    question = `Is ${oe} odd or even?`;
+                    answer = oe % 2 === 0 ? 'even' : 'odd';
+                    break;
+                    
+                case 'greaterLess':
+                    const gt1 = rand(20, 80);
+                    const gt2 = rand(20, 80);
+                    const symbol = gt1 > gt2 ? 'greater' : 'less';
+                    question = `Is ${gt1} greater or less than ${gt2}?`;
+                    answer = symbol;
+                    break;
+                    
+                case 'coins':
+                    const pennies = rand(0, 10);
+                    const nickels = rand(0, 5);
+                    const dimes = rand(0, 5);
+                    question = `${pennies} pennies + ${nickels} nickels + ${dimes} dimes = ? cents`;
+                    answer = (pennies * 1 + nickels * 5 + dimes * 10).toString();
+                    break;
+                    
+                case 'timeHour':
+                    const hour = rand(1, 12);
+                    question = `What time is shown: ${hour}:00? (Write the hour)`;
+                    answer = hour.toString();
+                    break;
+                    
+                case 'timeHalf':
+                    const hour2 = rand(1, 12);
+                    question = `What hour comes with ${hour2}:30?`;
+                    answer = hour2.toString();
+                    break;
+                    
+                case 'measurement':
+                    const m1 = rand(5, 20);
+                    const m2 = rand(5, 20);
+                    const obj1 = ['pencil', 'eraser', 'crayon', 'marker'][rand(0, 3)];
+                    const obj2 = ['book', 'ruler', 'paper', 'notebook'][rand(0, 3)];
+                    question = `A ${obj1} is ${m1} cm. A ${obj2} is ${m2} cm. Which is longer?`;
+                    answer = m1 > m2 ? obj1 : obj2;
+                    break;
+                    
+                case 'halves':
+                    const total = randEven(4, 12);
+                    question = `Half of ${total} = ?`;
+                    answer = (total / 2).toString();
+                    break;
+                    
+                case 'quarters':
+                    const total2 = [4, 8, 12, 16, 20][rand(0, 4)];
+                    question = `One quarter of ${total2} = ?`;
+                    answer = (total2 / 4).toString();
+                    break;
+                    
+                case 'shapes':
+                    const shapes = [
+                        { name: 'triangle', sides: 3 },
+                        { name: 'square', sides: 4 },
+                        { name: 'rectangle', sides: 4 },
+                        { name: 'pentagon', sides: 5 },
+                        { name: 'hexagon', sides: 6 }
+                    ];
+                    const shape = shapes[rand(0, shapes.length - 1)];
+                    question = `How many sides does a ${shape.name} have?`;
+                    answer = shape.sides.toString();
+                    break;
+                    
+                case 'perimeter':
+                    const side1 = rand(3, 10);
+                    const side2 = rand(3, 10);
+                    question = `Rectangle: length = ${side1} cm, width = ${side2} cm. What is the perimeter?`;
+                    answer = ((side1 + side2) * 2).toString();
+                    break;
+                    
+                case 'estimation':
+                    const e1 = rand(20, 45);
+                    const e2 = rand(20, 45);
+                    const sum = e1 + e2;
+                    const closest = sum < 50 ? 40 : (sum < 70 ? 60 : 80);
+                    question = `${e1} + ${e2} is closest to: 40, 60, or 80?`;
+                    answer = closest.toString();
+                    break;
+                    
+                case 'rounding':
+                    const r = rand(22, 88);
+                    const rounded = Math.round(r / 10) * 10;
+                    question = `Round ${r} to the nearest ten`;
+                    answer = rounded.toString();
+                    break;
+                    
+                case 'inverse':
+                    const io1 = rand(5, 15);
+                    const io2 = rand(5, 15);
+                    question = `If ${io1} + ${io2} = ${io1 + io2}, then ${io1 + io2} - ${io1} = ?`;
+                    answer = io2.toString();
+                    break;
+                    
+                case 'commutative':
+                    const tf1 = rand(3, 12);
+                    const tf2 = rand(3, 12);
+                    question = `True or False: ${tf1} + ${tf2} = ${tf2} + ${tf1}`;
+                    answer = 'true';
+                    break;
+                    
+                case 'making10':
+                    const mt = rand(1, 9);
+                    question = `${mt} + ? = 10`;
+                    answer = (10 - mt).toString();
+                    break;
+                    
+                case 'doubles':
+                    const db = rand(5, 20);
+                    question = `Double ${db} = ?`;
+                    answer = (db * 2).toString();
+                    break;
+                    
+                case 'nearDoubles':
+                    const nd = rand(5, 15);
+                    question = `${nd} + ${nd + 1} = ?`;
+                    answer = (nd + nd + 1).toString();
+                    break;
+            }
+            
+            return { question, answer };
+        }
+
+        function startNewType() {
+            stats = { correct: 0, total: 0, streak: 0 };
+            updateStats();
+            nextQuestion();
+        }
+
+        function nextQuestion() {
+            const type = document.getElementById('questionType').value;
+            const q = generateQuestion(type);
+            currentQuestion = q;
+            correctAnswer = q.answer.toLowerCase().trim();
+            
+            document.getElementById('questionText').textContent = q.question;
+            document.getElementById('answerInput').value = '';
+            document.getElementById('feedback').style.display = 'none';
+            document.getElementById('answerInput').focus();
+            answered = false;
+        }
+
+        function checkAnswer() {
+            if (answered) return;
+            
+            const userAnswer = document.getElementById('answerInput').value.toLowerCase().trim();
+            const feedback = document.getElementById('feedback');
+            
+            if (!userAnswer) {
+                feedback.textContent = '⚠️ Please enter an answer!';
+                feedback.className = 'feedback incorrect';
+                feedback.style.display = 'block';
+                return;
+            }
+            
+            answered = true;
+            stats.total++;
+            
+            if (userAnswer === correctAnswer) {
+                stats.correct++;
+                stats.streak++;
+                feedback.innerHTML = `🎉 Correct! Great job!`;
+                feedback.className = 'feedback correct';
+                
+                if (stats.streak === 5) {
+                    feedback.innerHTML += `<div class="celebration">🌟 5 in a row! You're amazing! 🌟</div>`;
+                }
+            } else {
+                stats.streak = 0;
+                feedback.innerHTML = `❌ Not quite. The answer is: <strong>${correctAnswer}</strong>`;
+                feedback.className = 'feedback incorrect';
+            }
+            
+            feedback.style.display = 'block';
+            updateStats();
+        }
+
+        function skipQuestion() {
+            nextQuestion();
+        }
+
+        function handleEnter(event) {
+            if (event.key === 'Enter') {
+                if (!answered) {
+                    checkAnswer();
+                } else {
+                    nextQuestion();
+                }
+            }
+        }
+
+        function updateStats() {
+            document.getElementById('correctCount').textContent = stats.correct;
+            document.getElementById('totalCount').textContent = stats.total;
+            document.getElementById('streakCount').textContent = stats.streak;
+        }
+
+        // Initialize with first question
+        nextQuestion();
+    </script>
+</body>
+</html>
