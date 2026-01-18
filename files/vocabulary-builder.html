@@ -93,6 +93,97 @@
             font-weight: 600;
         }
 
+        .api-setup {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 25px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 40px var(--soft-shadow);
+            border: 3px solid var(--sunshine-yellow);
+        }
+
+        .api-setup h3 {
+            color: var(--grape-purple);
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .api-setup p {
+            color: var(--night-sky);
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+
+        .api-setup ol {
+            margin: 15px 0 15px 30px;
+            color: var(--night-sky);
+        }
+
+        .api-setup li {
+            margin-bottom: 10px;
+            line-height: 1.6;
+        }
+
+        .api-setup a {
+            color: var(--grape-purple);
+            font-weight: 700;
+        }
+
+        .api-input-container {
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .api-input {
+            flex: 1;
+            min-width: 300px;
+            padding: 12px 20px;
+            border: 3px solid var(--sky-blue);
+            border-radius: 15px;
+            font-family: 'Fredoka', sans-serif;
+            font-size: 1rem;
+        }
+
+        .api-save-btn {
+            background: var(--grape-purple);
+            color: white;
+            border: none;
+            border-radius: 15px;
+            padding: 12px 30px;
+            font-family: 'Fredoka', sans-serif;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .api-save-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .api-status {
+            text-align: center;
+            margin-top: 15px;
+            font-weight: 600;
+            padding: 10px;
+            border-radius: 10px;
+        }
+
+        .api-status.success {
+            background: rgba(107, 207, 127, 0.2);
+            color: #2d7a3e;
+        }
+
+        .api-status.error {
+            background: rgba(255, 107, 157, 0.2);
+            color: #d63e6e;
+        }
+
         .controls {
             background: var(--cloud-white);
             border-radius: 30px;
@@ -393,7 +484,6 @@
             { word: "butterfly", category: "Animals", ageLevel: 5, subcategory: "Insects" },
             { word: "excited", category: "Emotions", ageLevel: 5, subcategory: "Complex Emotions" },
             { word: "celebrate", category: "Festival", ageLevel: 6, subcategory: "Actions" },
-            { word: "the", category: "Sight Words", ageLevel: 4, subcategory: "Common" },
             { word: "summer", category: "Seasonal", ageLevel: 4, subcategory: "Seasons" },
             { word: "metaphor", category: "Figure of Speech", ageLevel: 9, subcategory: "Literary Devices" },
             { word: "grateful", category: "Emotions", ageLevel: 7, subcategory: "Complex Emotions" },
@@ -404,15 +494,27 @@
         // Cache for dictionary definitions
         const definitionCache = {};
 
-        // Fetch definition from Free Dictionary API
-        const fetchDefinition = async (word) => {
+        // Fetch definition from Merriam-Webster Kid-Friendly APIs
+        const fetchDefinition = async (word, ageLevel, apiKey) => {
             // Check cache first
             if (definitionCache[word]) {
                 return definitionCache[word];
             }
 
+            if (!apiKey) {
+                return { error: true, message: "Please add your API key above to load definitions!" };
+            }
+
             try {
-                const response = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${word}`);
+                // Choose appropriate API based on age level
+                // Elementary (grades 3-5, ages 8-11) or Intermediate (grades 6-8)
+                const apiEndpoint = ageLevel <= 5 
+                    ? 'sd2' // Elementary Dictionary (simpler)
+                    : 'sd3'; // Intermediate Dictionary
+                
+                const url = `https://www.dictionaryapi.com/api/v3/references/${apiEndpoint}/json/${word}?key=${apiKey}`;
+                
+                const response = await fetch(url);
                 
                 if (!response.ok) {
                     throw new Error('Definition not found');
@@ -420,52 +522,105 @@
 
                 const data = await response.json();
                 
+                // Check if we got an array of suggestions (word not found)
+                if (Array.isArray(data) && typeof data[0] === 'string') {
+                    return { 
+                        error: true, 
+                        message: `Word not found. Did you mean: ${data.slice(0, 3).join(', ')}?` 
+                    };
+                }
+
                 // Extract the first definition
-                if (data && data[0] && data[0].meanings && data[0].meanings[0]) {
-                    const firstMeaning = data[0].meanings[0];
-                    const definition = firstMeaning.definitions[0].definition;
-                    
-                    // Simplify definition for kids if it's too technical
-                    const simplifiedDef = definition.charAt(0).toUpperCase() + definition.slice(1);
+                if (data && data[0] && data[0].shortdef && data[0].shortdef[0]) {
+                    const definition = data[0].shortdef[0];
                     
                     // Cache the result
-                    definitionCache[word] = simplifiedDef;
-                    return simplifiedDef;
+                    const result = { error: false, definition };
+                    definitionCache[word] = result;
+                    return result;
                 }
                 
                 throw new Error('No definition available');
             } catch (error) {
                 console.error(`Error fetching definition for "${word}":`, error);
-                return null;
+                return { error: true, message: 'Definition not available. Try another word!' };
             }
         };
 
-        function WordCard({ word, isFlipped, onFlip }) {
+        function APISetup({ apiKey, onApiKeyChange, onSave, saveStatus }) {
+            const [showInstructions, setShowInstructions] = useState(!apiKey);
+
+            return (
+                <div className="api-setup">
+                    <h3>🔑 Setup Your Dictionary API</h3>
+                    {showInstructions && (
+                        <>
+                            <p>This app uses <strong>Merriam-Webster's Kid-Friendly Dictionary APIs</strong> to provide age-appropriate definitions!</p>
+                            <ol>
+                                <li>Visit <a href="https://dictionaryapi.com/" target="_blank" rel="noopener">dictionaryapi.com</a></li>
+                                <li>Click "Register" and create a free account</li>
+                                <li>Go to "My Keys" page</li>
+                                <li>Register for the <strong>"Elementary Dictionary"</strong> API</li>
+                                <li>Copy your API key and paste it below</li>
+                            </ol>
+                        </>
+                    )}
+                    <div className="api-input-container">
+                        <input 
+                            type="text"
+                            className="api-input"
+                            placeholder="Paste your Merriam-Webster API key here..."
+                            value={apiKey}
+                            onChange={(e) => onApiKeyChange(e.target.value)}
+                        />
+                        <button className="api-save-btn" onClick={onSave}>
+                            Save Key
+                        </button>
+                    </div>
+                    {saveStatus && (
+                        <div className={`api-status ${saveStatus.type}`}>
+                            {saveStatus.message}
+                        </div>
+                    )}
+                    {apiKey && (
+                        <p style={{ textAlign: 'center', marginTop: '15px', fontSize: '0.9rem', color: '#666' }}>
+                            ✅ API Key saved! Click any word card to see kid-friendly definitions.
+                            {' '}
+                            <a href="#" onClick={(e) => { e.preventDefault(); setShowInstructions(!showInstructions); }}>
+                                {showInstructions ? 'Hide' : 'Show'} instructions
+                            </a>
+                        </p>
+                    )}
+                </div>
+            );
+        }
+
+        function WordCard({ word, isFlipped, onFlip, apiKey }) {
             const [definition, setDefinition] = useState(null);
             const [loading, setLoading] = useState(false);
-            const [error, setError] = useState(false);
+            const [error, setError] = useState(null);
 
             useEffect(() => {
                 if (isFlipped && !definition && !loading) {
                     setLoading(true);
-                    setError(false);
+                    setError(null);
                     
-                    fetchDefinition(word.word)
-                        .then(def => {
-                            if (def) {
-                                setDefinition(def);
+                    fetchDefinition(word.word, word.ageLevel, apiKey)
+                        .then(result => {
+                            if (result.error) {
+                                setError(result.message);
                             } else {
-                                setError(true);
+                                setDefinition(result.definition);
                             }
                         })
                         .catch(() => {
-                            setError(true);
+                            setError('Something went wrong. Please try again!');
                         })
                         .finally(() => {
                             setLoading(false);
                         });
                 }
-            }, [isFlipped, word.word, definition, loading]);
+            }, [isFlipped, word.word, word.ageLevel, definition, loading, apiKey]);
 
             const createPuzzle = (word) => {
                 if (word.length <= 2) return word;
@@ -501,16 +656,14 @@
                             {loading && (
                                 <div style={{ textAlign: 'center' }}>
                                     <div className="loading-spinner"></div>
-                                    <div className="hint-text">Loading definition...</div>
+                                    <div className="hint-text">Loading kid-friendly definition...</div>
                                 </div>
                             )}
                             {!loading && definition && (
                                 <div className="word-meaning">{definition}</div>
                             )}
                             {!loading && error && (
-                                <div className="error-message">
-                                    Definition not available. Try another word!
-                                </div>
+                                <div className="error-message">{error}</div>
                             )}
                         </>
                     )}
@@ -528,6 +681,8 @@
             const [selectedAge, setSelectedAge] = useState('all');
             const [selectedCategory, setSelectedCategory] = useState('all');
             const [flippedCards, setFlippedCards] = useState({});
+            const [apiKey, setApiKey] = useState(localStorage.getItem('mw_api_key') || '');
+            const [saveStatus, setSaveStatus] = useState(null);
 
             const ageGroups = [3, 4, 5, 6, 7, 8, 9, 10, 11];
             const categories = ['All', ...new Set(words.map(w => w.category))];
@@ -553,6 +708,17 @@
                 }));
             };
 
+            const handleSaveApiKey = () => {
+                if (apiKey.trim()) {
+                    localStorage.setItem('mw_api_key', apiKey.trim());
+                    setSaveStatus({ type: 'success', message: '✅ API Key saved successfully!' });
+                    setTimeout(() => setSaveStatus(null), 3000);
+                } else {
+                    setSaveStatus({ type: 'error', message: '❌ Please enter a valid API key' });
+                    setTimeout(() => setSaveStatus(null), 3000);
+                }
+            };
+
             // Load words from JSON file
             useEffect(() => {
                 fetch('words.json')
@@ -569,7 +735,6 @@
                     .catch(error => {
                         console.error('Error loading words:', error);
                         console.log('Using sample data instead');
-                        // Keep using sample data if JSON fails to load
                     });
             }, []);
 
@@ -579,6 +744,13 @@
                         <h1>🌟 Word Wizard 🌟</h1>
                         <p>Build Your Vocabulary Adventure!</p>
                     </div>
+
+                    <APISetup 
+                        apiKey={apiKey}
+                        onApiKeyChange={setApiKey}
+                        onSave={handleSaveApiKey}
+                        saveStatus={saveStatus}
+                    />
 
                     <div className="controls">
                         <div className="filter-section">
@@ -627,6 +799,7 @@
                                         word={word}
                                         isFlipped={flippedCards[index]}
                                         onFlip={() => handleFlip(index)}
+                                        apiKey={apiKey}
                                     />
                                 ))}
                             </div>
