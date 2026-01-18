@@ -622,6 +622,17 @@
                 }
             }, [isFlipped, word.word, word.ageLevel, definition, loading, apiKey]);
 
+            // Auto-flip back after 15 seconds
+            useEffect(() => {
+                if (isFlipped && !loading) {
+                    const timer = setTimeout(() => {
+                        onFlip(); // Flip back to front
+                    }, 15000); // 15 seconds
+
+                    return () => clearTimeout(timer); // Cleanup timer on unmount or flip
+                }
+            }, [isFlipped, loading, onFlip]);
+
             const createPuzzle = (word) => {
                 if (word.length <= 2) return word;
                 
