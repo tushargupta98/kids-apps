@@ -1,226 +1,302 @@
 [
   {
     "word": "apple",
-    "meaning": "A round fruit that grows on trees, usually red or green",
     "category": "Food",
     "ageLevel": 3,
     "subcategory": "Fruits"
   },
   {
     "word": "happy",
-    "meaning": "Feeling joy and pleasure",
     "category": "Emotions",
     "ageLevel": 3,
     "subcategory": "Basic Emotions"
   },
   {
     "word": "cat",
-    "meaning": "A small furry animal that says meow",
     "category": "Animals",
     "ageLevel": 3,
     "subcategory": "Pets"
   },
   {
     "word": "dog",
-    "meaning": "A friendly animal that barks and wags its tail",
     "category": "Animals",
     "ageLevel": 3,
     "subcategory": "Pets"
   },
   {
     "word": "sun",
-    "meaning": "The bright ball of light in the sky during the day",
     "category": "Nature",
     "ageLevel": 3,
     "subcategory": "Sky"
   },
   {
     "word": "hello",
-    "meaning": "A greeting used when you meet someone",
     "category": "Expressions",
     "ageLevel": 3,
     "subcategory": "Greetings"
   },
   {
+    "word": "book",
+    "category": "Objects",
+    "ageLevel": 3,
+    "subcategory": "School"
+  },
+  {
+    "word": "red",
+    "category": "Colors",
+    "ageLevel": 3,
+    "subcategory": "Primary"
+  },
+  {
+    "word": "blue",
+    "category": "Colors",
+    "ageLevel": 3,
+    "subcategory": "Primary"
+  },
+  {
     "word": "the",
-    "meaning": "Used before a noun to show a specific thing",
     "category": "Sight Words",
     "ageLevel": 4,
     "subcategory": "Common"
   },
   {
     "word": "and",
-    "meaning": "A word used to connect two things together",
+    "category": "Sight Words",
+    "ageLevel": 4,
+    "subcategory": "Common"
+  },
+  {
+    "word": "said",
     "category": "Sight Words",
     "ageLevel": 4,
     "subcategory": "Common"
   },
   {
     "word": "summer",
-    "meaning": "The warmest season of the year",
     "category": "Seasonal",
     "ageLevel": 4,
     "subcategory": "Seasons"
   },
   {
     "word": "winter",
-    "meaning": "The coldest season of the year, often with snow",
+    "category": "Seasonal",
+    "ageLevel": 4,
+    "subcategory": "Seasons"
+  },
+  {
+    "word": "spring",
     "category": "Seasonal",
     "ageLevel": 4,
     "subcategory": "Seasons"
   },
   {
     "word": "butterfly",
-    "meaning": "A colorful insect with large wings",
     "category": "Animals",
     "ageLevel": 5,
     "subcategory": "Insects"
   },
   {
     "word": "excited",
-    "meaning": "Very happy and full of energy about something",
     "category": "Emotions",
     "ageLevel": 5,
     "subcategory": "Complex Emotions"
   },
   {
     "word": "rainbow",
-    "meaning": "Colorful arc in the sky after rain",
     "category": "Nature",
     "ageLevel": 5,
     "subcategory": "Weather"
   },
   {
     "word": "birthday",
-    "meaning": "The day you were born, celebrated every year",
     "category": "Festival",
     "ageLevel": 5,
     "subcategory": "Celebrations"
   },
   {
+    "word": "friend",
+    "category": "People",
+    "ageLevel": 5,
+    "subcategory": "Relationships"
+  },
+  {
     "word": "celebrate",
-    "meaning": "To do something special for a happy occasion",
     "category": "Festival",
     "ageLevel": 6,
     "subcategory": "Actions"
   },
   {
     "word": "snowflake",
-    "meaning": "A single piece of snow with a unique pattern",
     "category": "Seasonal",
     "ageLevel": 6,
     "subcategory": "Winter"
   },
   {
     "word": "autumn",
-    "meaning": "The season when leaves change color and fall",
     "category": "Seasonal",
     "ageLevel": 6,
     "subcategory": "Seasons"
   },
   {
+    "word": "ocean",
+    "category": "Nature",
+    "ageLevel": 6,
+    "subcategory": "Water"
+  },
+  {
+    "word": "mountain",
+    "category": "Nature",
+    "ageLevel": 6,
+    "subcategory": "Land"
+  },
+  {
     "word": "grateful",
-    "meaning": "Feeling thankful for something good",
     "category": "Emotions",
     "ageLevel": 7,
     "subcategory": "Complex Emotions"
   },
   {
     "word": "wonderful",
-    "meaning": "Extremely good or amazing",
     "category": "Expressions",
     "ageLevel": 7,
     "subcategory": "Positive"
   },
   {
     "word": "halloween",
-    "meaning": "A holiday on October 31st with costumes and candy",
     "category": "Festival",
     "ageLevel": 7,
     "subcategory": "Holidays"
   },
   {
+    "word": "journey",
+    "category": "Actions",
+    "ageLevel": 7,
+    "subcategory": "Travel"
+  },
+  {
+    "word": "discover",
+    "category": "Actions",
+    "ageLevel": 7,
+    "subcategory": "Learning"
+  },
+  {
     "word": "anxious",
-    "meaning": "Feeling worried or nervous about something",
     "category": "Emotions",
     "ageLevel": 8,
     "subcategory": "Complex Emotions"
   },
   {
     "word": "simile",
-    "meaning": "Comparing two things using 'like' or 'as'",
     "category": "Figure of Speech",
     "ageLevel": 8,
     "subcategory": "Literary Devices"
   },
   {
     "word": "thanksgiving",
-    "meaning": "A holiday for being thankful and sharing a big meal",
     "category": "Festival",
     "ageLevel": 8,
     "subcategory": "Holidays"
   },
   {
+    "word": "adventure",
+    "category": "Actions",
+    "ageLevel": 8,
+    "subcategory": "Experience"
+  },
+  {
+    "word": "courage",
+    "category": "Emotions",
+    "ageLevel": 8,
+    "subcategory": "Character Traits"
+  },
+  {
     "word": "metaphor",
-    "meaning": "Comparing two things by saying one is the other",
     "category": "Figure of Speech",
     "ageLevel": 9,
     "subcategory": "Literary Devices"
   },
   {
     "word": "perseverance",
-    "meaning": "Continuing to try even when things are difficult",
     "category": "Emotions",
     "ageLevel": 9,
     "subcategory": "Character Traits"
   },
   {
     "word": "blizzard",
-    "meaning": "A severe snowstorm with strong winds",
     "category": "Seasonal",
     "ageLevel": 9,
     "subcategory": "Winter Weather"
   },
   {
+    "word": "ancient",
+    "category": "History",
+    "ageLevel": 9,
+    "subcategory": "Time"
+  },
+  {
+    "word": "brilliant",
+    "category": "Expressions",
+    "ageLevel": 9,
+    "subcategory": "Descriptive"
+  },
+  {
     "word": "personification",
-    "meaning": "Giving human qualities to non-human things",
     "category": "Figure of Speech",
     "ageLevel": 10,
     "subcategory": "Literary Devices"
   },
   {
     "word": "melancholy",
-    "meaning": "A feeling of deep sadness or thoughtfulness",
     "category": "Emotions",
     "ageLevel": 10,
     "subcategory": "Complex Emotions"
   },
   {
     "word": "solstice",
-    "meaning": "The longest or shortest day of the year",
     "category": "Seasonal",
     "ageLevel": 10,
     "subcategory": "Astronomy"
   },
   {
+    "word": "phenomenon",
+    "category": "Science",
+    "ageLevel": 10,
+    "subcategory": "Concepts"
+  },
+  {
+    "word": "magnificent",
+    "category": "Expressions",
+    "ageLevel": 10,
+    "subcategory": "Descriptive"
+  },
+  {
     "word": "hyperbole",
-    "meaning": "Extreme exaggeration for effect",
     "category": "Figure of Speech",
     "ageLevel": 11,
     "subcategory": "Literary Devices"
   },
   {
     "word": "resilience",
-    "meaning": "The ability to recover quickly from difficulties",
     "category": "Emotions",
     "ageLevel": 11,
     "subcategory": "Character Traits"
   },
   {
-    "word": "magnificent",
-    "meaning": "Extremely beautiful or impressive",
+    "word": "extraordinary",
     "category": "Expressions",
     "ageLevel": 11,
     "subcategory": "Descriptive"
+  },
+  {
+    "word": "innovation",
+    "category": "Science",
+    "ageLevel": 11,
+    "subcategory": "Progress"
+  },
+  {
+    "word": "eloquent",
+    "category": "Expressions",
+    "ageLevel": 11,
+    "subcategory": "Communication"
   }
 ]
