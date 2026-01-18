@@ -178,6 +178,7 @@
             cursor: pointer;
             position: relative;
             overflow: hidden;
+            min-height: 280px;
         }
 
         .word-card::before {
@@ -207,6 +208,10 @@
         .word-card.flipped {
             background: linear-gradient(135deg, var(--grape-purple), var(--coral-pink));
             color: white;
+        }
+
+        .word-card.loading {
+            opacity: 0.6;
         }
 
         .category-badge {
@@ -296,6 +301,32 @@
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
         }
 
+        .loading-spinner {
+            display: inline-block;
+            width: 30px;
+            height: 30px;
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .error-message {
+            color: var(--coral-pink);
+            font-size: 0.9rem;
+            margin-top: 10px;
+            font-style: italic;
+        }
+
+        .word-card.flipped .error-message {
+            color: rgba(255, 255, 255, 0.9);
+        }
+
         .stats {
             background: var(--cloud-white);
             border-radius: 25px;
@@ -354,95 +385,88 @@
     <script type="text/babel">
         const { useState, useEffect } = React;
 
-        // Sample data structure - you'll replace this with your JSON file
+        // Sample data structure - word list without meanings
         const sampleWords = [
-            {
-                word: "apple",
-                meaning: "A round fruit that grows on trees, usually red or green",
-                category: "Food",
-                ageLevel: 3,
-                subcategory: "Fruits"
-            },
-            {
-                word: "happy",
-                meaning: "Feeling joy and pleasure",
-                category: "Emotions",
-                ageLevel: 3,
-                subcategory: "Basic Emotions"
-            },
-            {
-                word: "cat",
-                meaning: "A small furry animal that says meow",
-                category: "Animals",
-                ageLevel: 3,
-                subcategory: "Pets"
-            },
-            {
-                word: "butterfly",
-                meaning: "A colorful insect with large wings",
-                category: "Animals",
-                ageLevel: 5,
-                subcategory: "Insects"
-            },
-            {
-                word: "excited",
-                meaning: "Very happy and full of energy about something",
-                category: "Emotions",
-                ageLevel: 5,
-                subcategory: "Complex Emotions"
-            },
-            {
-                word: "celebrate",
-                meaning: "To do something special for a happy occasion",
-                category: "Festival",
-                ageLevel: 6,
-                subcategory: "Actions"
-            },
-            {
-                word: "the",
-                meaning: "Used before a noun to show a specific thing",
-                category: "Sight Words",
-                ageLevel: 4,
-                subcategory: "Common"
-            },
-            {
-                word: "summer",
-                meaning: "The warmest season of the year",
-                category: "Seasonal",
-                ageLevel: 4,
-                subcategory: "Seasons"
-            },
-            {
-                word: "metaphor",
-                meaning: "Comparing two things by saying one is the other",
-                category: "Figure of Speech",
-                ageLevel: 9,
-                subcategory: "Literary Devices"
-            },
-            {
-                word: "grateful",
-                meaning: "Feeling thankful for something good",
-                category: "Emotions",
-                ageLevel: 7,
-                subcategory: "Complex Emotions"
-            },
-            {
-                word: "hello",
-                meaning: "A greeting used when you meet someone",
-                category: "Expressions",
-                ageLevel: 3,
-                subcategory: "Greetings"
-            },
-            {
-                word: "snowflake",
-                meaning: "A single piece of snow with a unique pattern",
-                category: "Seasonal",
-                ageLevel: 6,
-                subcategory: "Winter"
-            }
+            { word: "apple", category: "Food", ageLevel: 3, subcategory: "Fruits" },
+            { word: "happy", category: "Emotions", ageLevel: 3, subcategory: "Basic Emotions" },
+            { word: "cat", category: "Animals", ageLevel: 3, subcategory: "Pets" },
+            { word: "butterfly", category: "Animals", ageLevel: 5, subcategory: "Insects" },
+            { word: "excited", category: "Emotions", ageLevel: 5, subcategory: "Complex Emotions" },
+            { word: "celebrate", category: "Festival", ageLevel: 6, subcategory: "Actions" },
+            { word: "the", category: "Sight Words", ageLevel: 4, subcategory: "Common" },
+            { word: "summer", category: "Seasonal", ageLevel: 4, subcategory: "Seasons" },
+            { word: "metaphor", category: "Figure of Speech", ageLevel: 9, subcategory: "Literary Devices" },
+            { word: "grateful", category: "Emotions", ageLevel: 7, subcategory: "Complex Emotions" },
+            { word: "hello", category: "Expressions", ageLevel: 3, subcategory: "Greetings" },
+            { word: "snowflake", category: "Seasonal", ageLevel: 6, subcategory: "Winter" }
         ];
 
+        // Cache for dictionary definitions
+        const definitionCache = {};
+
+        // Fetch definition from Free Dictionary API
+        const fetchDefinition = async (word) => {
+            // Check cache first
+            if (definitionCache[word]) {
+                return definitionCache[word];
+            }
+
+            try {
+                const response = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${word}`);
+                
+                if (!response.ok) {
+                    throw new Error('Definition not found');
+                }
+
+                const data = await response.json();
+                
+                // Extract the first definition
+                if (data && data[0] && data[0].meanings && data[0].meanings[0]) {
+                    const firstMeaning = data[0].meanings[0];
+                    const definition = firstMeaning.definitions[0].definition;
+                    
+                    // Simplify definition for kids if it's too technical
+                    const simplifiedDef = definition.charAt(0).toUpperCase() + definition.slice(1);
+                    
+                    // Cache the result
+                    definitionCache[word] = simplifiedDef;
+                    return simplifiedDef;
+                }
+                
+                throw new Error('No definition available');
+            } catch (error) {
+                console.error(`Error fetching definition for "${word}":`, error);
+                return null;
+            }
+        };
+
         function WordCard({ word, isFlipped, onFlip }) {
+            const [definition, setDefinition] = useState(null);
+            const [loading, setLoading] = useState(false);
+            const [error, setError] = useState(false);
+
+            useEffect(() => {
+                if (isFlipped && !definition && !loading) {
+                    setLoading(true);
+                    setError(false);
+                    
+                    fetchDefinition(word.word)
+                        .then(def => {
+                            if (def) {
+                                setDefinition(def);
+                            } else {
+                                setError(true);
+                            }
+                        })
+                        .catch(() => {
+                            setError(true);
+                        })
+                        .finally(() => {
+                            setLoading(false);
+                        });
+                }
+            }, [isFlipped, word.word, definition, loading]);
+
             const createPuzzle = (word) => {
                 if (word.length <= 2) return word;
                 
@@ -463,7 +487,7 @@
 
             return (
                 <div 
-                    className={`word-card ${isFlipped ? 'flipped' : ''}`}
+                    className={`word-card ${isFlipped ? 'flipped' : ''} ${loading ? 'loading' : ''}`}
                     onClick={onFlip}
                 >
                     <div className="age-badge">{word.ageLevel}+</div>
@@ -471,9 +495,28 @@
                     <div className="word-puzzle">
                         {isFlipped ? word.word.toUpperCase() : createPuzzle(word.word)}
                     </div>
-                    <div className="word-meaning">{word.meaning}</div>
+                    
+                    {isFlipped && (
+                        <>
+                            {loading && (
+                                <div style={{ textAlign: 'center' }}>
+                                    <div className="loading-spinner"></div>
+                                    <div className="hint-text">Loading definition...</div>
+                                </div>
+                            )}
+                            {!loading && definition && (
+                                <div className="word-meaning">{definition}</div>
+                            )}
+                            {!loading && error && (
+                                <div className="error-message">
+                                    Definition not available. Try another word!
+                                </div>
+                            )}
+                        </>
+                    )}
+                    
                     {!isFlipped && (
-                        <div className="hint-text">Click to reveal the word!</div>
+                        <div className="hint-text">Click to reveal the word and its meaning!</div>
                     )}
                 </div>
             );
