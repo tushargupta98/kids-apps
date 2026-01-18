@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Word Wizard - Vocabulary Builder for Kids</title>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Chewy&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --sunshine-yellow: #FFD93D;
+            --sky-blue: #6BCF7F;
+            --coral-pink: #FF6B9D;
+            --grape-purple: #9D5CFF;
+            --mint-green: #6BCF7F;
+            --peachy: #FFB088;
+            --cloud-white: #FFFFFF;
+            --night-sky: #2D3561;
+            --soft-shadow: rgba(45, 53, 97, 0.15);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Fredoka', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                radial-gradient(circle at 20% 50%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(255, 255, 255, 0.1) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        #root {
+            position: relative;
+            z-index: 1;
+        }
+
+        .app-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            padding: 40px 20px;
+            animation: slideDown 0.6s ease-out;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .header h1 {
+            font-family: 'Chewy', cursive;
+            font-size: 4rem;
+            color: var(--cloud-white);
+            text-shadow: 4px 4px 0px var(--grape-purple),
+                         8px 8px 0px rgba(0, 0, 0, 0.1);
+            margin-bottom: 10px;
+            letter-spacing: 2px;
+        }
+
+        .header p {
+            font-size: 1.4rem;
+            color: var(--sunshine-yellow);
+            font-weight: 600;
+        }
+
+        .controls {
+            background: var(--cloud-white);
+            border-radius: 30px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 40px var(--soft-shadow);
+            animation: fadeIn 0.8s ease-out 0.2s backwards;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .filter-section {
+            margin-bottom: 25px;
+        }
+
+        .filter-section h3 {
+            color: var(--night-sky);
+            font-size: 1.3rem;
+            margin-bottom: 15px;
+            font-weight: 700;
+        }
+
+        .filter-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .filter-btn {
+            background: var(--sky-blue);
+            border: none;
+            border-radius: 20px;
+            padding: 12px 24px;
+            font-family: 'Fredoka', sans-serif;
+            font-size: 1rem;
+            font-weight: 600;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .filter-btn:hover {
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .filter-btn.active {
+            background: var(--grape-purple);
+            transform: scale(1.08);
+        }
+
+        .age-btn {
+            background: var(--coral-pink);
+        }
+
+        .age-btn.active {
+            background: var(--peachy);
+        }
+
+        .card-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 25px;
+            animation: fadeIn 1s ease-out 0.4s backwards;
+        }
+
+        .word-card {
+            background: var(--cloud-white);
+            border-radius: 25px;
+            padding: 30px;
+            box-shadow: 0 8px 30px var(--soft-shadow);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .word-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, 
+                transparent 30%, 
+                rgba(255, 255, 255, 0.3) 50%, 
+                transparent 70%);
+            transform: rotate(45deg);
+            transition: all 0.6s;
+        }
+
+        .word-card:hover::before {
+            left: 100%;
+        }
+
+        .word-card:hover {
+            transform: translateY(-10px) rotate(-2deg);
+            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.2);
+        }
+
+        .word-card.flipped {
+            background: linear-gradient(135deg, var(--grape-purple), var(--coral-pink));
+            color: white;
+        }
+
+        .category-badge {
+            display: inline-block;
+            background: var(--sunshine-yellow);
+            color: var(--night-sky);
+            padding: 6px 16px;
+            border-radius: 15px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .word-puzzle {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--night-sky);
+            margin: 20px 0;
+            letter-spacing: 8px;
+            font-family: 'Chewy', cursive;
+            text-align: center;
+        }
+
+        .word-card.flipped .word-puzzle {
+            color: var(--sunshine-yellow);
+            letter-spacing: 4px;
+        }
+
+        .letter-blank {
+            display: inline-block;
+            width: 40px;
+            height: 50px;
+            background: var(--sky-blue);
+            border-radius: 8px;
+            margin: 0 3px;
+            vertical-align: middle;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.5;
+            }
+        }
+
+        .word-meaning {
+            font-size: 1.1rem;
+            color: var(--night-sky);
+            line-height: 1.6;
+            margin-top: 15px;
+        }
+
+        .word-card.flipped .word-meaning {
+            color: white;
+        }
+
+        .hint-text {
+            font-size: 0.9rem;
+            color: #666;
+            font-style: italic;
+            margin-top: 10px;
+        }
+
+        .word-card.flipped .hint-text {
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .age-badge {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: var(--peachy);
+            color: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.1rem;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .stats {
+            background: var(--cloud-white);
+            border-radius: 25px;
+            padding: 20px 30px;
+            margin-top: 30px;
+            text-align: center;
+            box-shadow: 0 8px 30px var(--soft-shadow);
+        }
+
+        .stats h3 {
+            color: var(--night-sky);
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+        }
+
+        .stats p {
+            color: var(--grape-purple);
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .no-words {
+            text-align: center;
+            padding: 60px 20px;
+            color: white;
+            font-size: 1.5rem;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2.5rem;
+            }
+
+            .header p {
+                font-size: 1.1rem;
+            }
+
+            .card-container {
+                grid-template-columns: 1fr;
+            }
+
+            .filter-buttons {
+                justify-content: center;
+            }
+
+            .word-puzzle {
+                font-size: 2rem;
+                letter-spacing: 4px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        // Sample data structure - you'll replace this with your JSON file
+        const sampleWords = [
+            {
+                word: "apple",
+                meaning: "A round fruit that grows on trees, usually red or green",
+                category: "Food",
+                ageLevel: 3,
+                subcategory: "Fruits"
+            },
+            {
+                word: "happy",
+                meaning: "Feeling joy and pleasure",
+                category: "Emotions",
+                ageLevel: 3,
+                subcategory: "Basic Emotions"
+            },
+            {
+                word: "cat",
+                meaning: "A small furry animal that says meow",
+                category: "Animals",
+                ageLevel: 3,
+                subcategory: "Pets"
+            },
+            {
+                word: "butterfly",
+                meaning: "A colorful insect with large wings",
+                category: "Animals",
+                ageLevel: 5,
+                subcategory: "Insects"
+            },
+            {
+                word: "excited",
+                meaning: "Very happy and full of energy about something",
+                category: "Emotions",
+                ageLevel: 5,
+                subcategory: "Complex Emotions"
+            },
+            {
+                word: "celebrate",
+                meaning: "To do something special for a happy occasion",
+                category: "Festival",
+                ageLevel: 6,
+                subcategory: "Actions"
+            },
+            {
+                word: "the",
+                meaning: "Used before a noun to show a specific thing",
+                category: "Sight Words",
+                ageLevel: 4,
+                subcategory: "Common"
+            },
+            {
+                word: "summer",
+                meaning: "The warmest season of the year",
+                category: "Seasonal",
+                ageLevel: 4,
+                subcategory: "Seasons"
+            },
+            {
+                word: "metaphor",
+                meaning: "Comparing two things by saying one is the other",
+                category: "Figure of Speech",
+                ageLevel: 9,
+                subcategory: "Literary Devices"
+            },
+            {
+                word: "grateful",
+                meaning: "Feeling thankful for something good",
+                category: "Emotions",
+                ageLevel: 7,
+                subcategory: "Complex Emotions"
+            },
+            {
+                word: "hello",
+                meaning: "A greeting used when you meet someone",
+                category: "Expressions",
+                ageLevel: 3,
+                subcategory: "Greetings"
+            },
+            {
+                word: "snowflake",
+                meaning: "A single piece of snow with a unique pattern",
+                category: "Seasonal",
+                ageLevel: 6,
+                subcategory: "Winter"
+            }
+        ];
+
+        function WordCard({ word, isFlipped, onFlip }) {
+            const createPuzzle = (word) => {
+                if (word.length <= 2) return word;
+                
+                const first = word[0];
+                const last = word[word.length - 1];
+                const middle = word.slice(1, -1);
+                
+                return (
+                    <>
+                        {first}
+                        {middle.split('').map((_, index) => (
+                            <span key={index} className="letter-blank"></span>
+                        ))}
+                        {last}
+                    </>
+                );
+            };
+
+            return (
+                <div 
+                    className={`word-card ${isFlipped ? 'flipped' : ''}`}
+                    onClick={onFlip}
+                >
+                    <div className="age-badge">{word.ageLevel}+</div>
+                    <div className="category-badge">{word.category}</div>
+                    <div className="word-puzzle">
+                        {isFlipped ? word.word.toUpperCase() : createPuzzle(word.word)}
+                    </div>
+                    <div className="word-meaning">{word.meaning}</div>
+                    {!isFlipped && (
+                        <div className="hint-text">Click to reveal the word!</div>
+                    )}
+                </div>
+            );
+        }
+
+        function App() {
+            const [words, setWords] = useState(sampleWords);
+            const [filteredWords, setFilteredWords] = useState(sampleWords);
+            const [selectedAge, setSelectedAge] = useState('all');
+            const [selectedCategory, setSelectedCategory] = useState('all');
+            const [flippedCards, setFlippedCards] = useState({});
+
+            const ageGroups = [3, 4, 5, 6, 7, 8, 9, 10, 11];
+            const categories = ['All', ...new Set(words.map(w => w.category))];
+
+            useEffect(() => {
+                let filtered = words;
+
+                if (selectedAge !== 'all') {
+                    filtered = filtered.filter(w => w.ageLevel === parseInt(selectedAge));
+                }
+
+                if (selectedCategory !== 'all') {
+                    filtered = filtered.filter(w => w.category === selectedCategory);
+                }
+
+                setFilteredWords(filtered);
+            }, [selectedAge, selectedCategory, words]);
+
+            const handleFlip = (index) => {
+                setFlippedCards(prev => ({
+                    ...prev,
+                    [index]: !prev[index]
+                }));
+            };
+
+            // Load words from JSON file
+            useEffect(() => {
+                fetch('words.json')
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Failed to load words.json');
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        setWords(data);
+                        setFilteredWords(data);
+                    })
+                    .catch(error => {
+                        console.error('Error loading words:', error);
+                        console.log('Using sample data instead');
+                        // Keep using sample data if JSON fails to load
+                    });
+            }, []);
+
+            return (
+                <div className="app-container">
+                    <div className="header">
+                        <h1>🌟 Word Wizard 🌟</h1>
+                        <p>Build Your Vocabulary Adventure!</p>
+                    </div>
+
+                    <div className="controls">
+                        <div className="filter-section">
+                            <h3>Choose Your Age Level:</h3>
+                            <div className="filter-buttons">
+                                <button
+                                    className={`filter-btn age-btn ${selectedAge === 'all' ? 'active' : ''}`}
+                                    onClick={() => setSelectedAge('all')}
+                                >
+                                    All Ages
+                                </button>
+                                {ageGroups.map(age => (
+                                    <button
+                                        key={age}
+                                        className={`filter-btn age-btn ${selectedAge === age ? 'active' : ''}`}
+                                        onClick={() => setSelectedAge(age)}
+                                    >
+                                        Age {age}+
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+
+                        <div className="filter-section">
+                            <h3>Pick a Category:</h3>
+                            <div className="filter-buttons">
+                                {categories.map(category => (
+                                    <button
+                                        key={category}
+                                        className={`filter-btn ${selectedCategory === (category === 'All' ? 'all' : category) ? 'active' : ''}`}
+                                        onClick={() => setSelectedCategory(category === 'All' ? 'all' : category)}
+                                    >
+                                        {category}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+
+                    {filteredWords.length > 0 ? (
+                        <>
+                            <div className="card-container">
+                                {filteredWords.map((word, index) => (
+                                    <WordCard
+                                        key={index}
+                                        word={word}
+                                        isFlipped={flippedCards[index]}
+                                        onFlip={() => handleFlip(index)}
+                                    />
+                                ))}
+                            </div>
+
+                            <div className="stats">
+                                <h3>📚 Words to Learn</h3>
+                                <p>{filteredWords.length} Words</p>
+                            </div>
+                        </>
+                    ) : (
+                        <div className="no-words">
+                            No words found for this selection. Try a different combination!
+                        </div>
+                    )}
+                </div>
+            );
+        }
+
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+</body>
+</html>
