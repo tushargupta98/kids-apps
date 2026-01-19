@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Tracing Worksheets</title>
+
+    <!-- Existing CSS -->
+    <link rel="stylesheet" href="./css/worksheet.css">
+
+    <!-- Tracing font -->
+    <style>
+        @font-face {
+            font-family: 'KG Primary Dots';
+            src: url('./fonts/KGPrimaryDots.ttf') format('truetype');
+        }
+
+        /* Tracing-only additions */
+        .tracing-worksheet {
+            font-family: 'KG Primary Dots', cursive;
+        }
+
+        .tracing-area {
+            height: calc(11in - 2in);
+            overflow: hidden;
+        }
+
+        .tracing-row {
+            display: flex;
+            white-space: nowrap;
+            margin-bottom: 14px;
+        }
+
+        .tracing-char {
+            font-size: var(--trace-size);
+            line-height: 1.4;
+            margin-right: 18px;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="controls">
+    <h1>Tracing Practice</h1>
+
+    <div class="level-selector">
+        <button class="level-btn active" onclick="setTracingLevel(1)">Alphabet (Single)</button>
+        <button class="level-btn" onclick="setTracingLevel(2)">Alphabet (All)</button>
+        <button class="level-btn" onclick="setTracingLevel(3)">Numbers</button>
+        <button class="level-btn" onclick="setTracingLevel(4)">Custom Text</button>
+    </div>
+
+    <div class="level-selector">
+        <input id="traceSymbol" placeholder="A / a / 5">
+        <select id="traceCase">
+            <option value="upper">Uppercase</option>
+            <option value="lower">Lowercase</option>
+        </select>
+        <input id="traceSize" type="number" value="72" min="24">
+        <textarea id="traceText" placeholder="Enter custom text"></textarea>
+    </div>
+
+    <div class="action-buttons">
+        <button class="refresh-btn" onclick="generateTracing()">Generate</button>
+        <button class="print-btn" onclick="window.print()">Print</button>
+    </div>
+</div>
+
+<div class="worksheet tracing-worksheet">
+    <div class="worksheet-header">
+        <h2>Tracing Worksheet</h2>
+        <div class="worksheet-info">
+            <span>Name: __________</span>
+            <span>Date: __________</span>
+        </div>
+    </div>
+
+    <div id="tracingOutput" class="tracing-area"></div>
+</div>
+
+<!-- Existing JS (loaded but unused here) -->
+<script src="./js/worksheet.js"></script>
+
+<!-- Tracing-only JS -->
+<script src="./js/tracing.js"></script>
+
+</body>
+</html>
