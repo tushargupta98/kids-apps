@@ -80,30 +80,46 @@ if (window.currentLevel === 1) {
 }
 
 
-    // LEVEL 2: All alphabets repeated per row with optional range
-    if (window.currentLevel === 2) {
-        const casing = document.getElementById('traceCase').value;
-        const startChar = document.getElementById('rangeStart').value.toUpperCase() || 'A';
-        const endChar = document.getElementById('rangeEnd').value.toUpperCase() || 'Z';
-        const startCode = startChar.charCodeAt(0);
-        const endCode = endChar.charCodeAt(0);
+// LEVEL 2: Alphabet range filling the div
+if (window.currentLevel === 2) {
+    let startChar = document.getElementById('traceSymbol').value || 'A';
+    let endChar = document.getElementById('traceCase').value || 'Z';
 
-        for (let i = startCode; i <= endCode; i++) {
-            const row = document.createElement('div');
-            row.className = 'tracing-row';
-            const ch = String.fromCharCode(i);
-            const displayChar = casing === 'upper' ? ch.toUpperCase() : ch.toLowerCase();
+    // Convert to uppercase for consistent display
+    startChar = startChar.toUpperCase();
+    endChar = endChar.toUpperCase();
 
-            for (let j = 0; j < 8; j++) {
-                const span = document.createElement('span');
-                span.className = 'tracing-char';
-                span.textContent = displayChar;
-                row.appendChild(span);
-            }
-            output.appendChild(row);
+    const startCode = startChar.charCodeAt(0);
+    const endCode = endChar.charCodeAt(0);
+
+    const letters = [];
+    for (let c = startCode; c <= endCode; c++) letters.push(String.fromCharCode(c));
+
+    const rowHeight = parseInt(size) * 1.5;
+    const areaHeight = output.clientHeight;
+    const numRows = Math.floor(areaHeight / rowHeight);
+
+    const spanWidth = parseInt(size) * 0.8;
+    const areaWidth = output.clientWidth;
+    const numCols = Math.floor(areaWidth / spanWidth);
+
+    for (let r = 0; r < numRows; r++) {
+        const row = document.createElement('div');
+        row.className = 'tracing-row';
+
+        for (let c = 0; c < numCols; c++) {
+            const span = document.createElement('span');
+            span.className = 'tracing-char';
+
+            // Repeat letters in sequence horizontally
+            span.textContent = letters[c % letters.length];
+            row.appendChild(span);
         }
-        return;
+
+        output.appendChild(row);
     }
+    return;
+}
 
     // LEVEL 3: Numbers filling the div
 if (window.currentLevel === 3) {
