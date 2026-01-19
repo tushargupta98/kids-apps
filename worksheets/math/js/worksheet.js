@@ -1,403 +1,314 @@
-:root {
-    --primary: #E74C3C;
-    --secondary: #9B59B6;
-    --accent: #F39C12;
-    --dark: #2C3E50;
-    --bg: #FFF0F5;
+let worksheetConfig = {
+    operationType: 'multiplication',
+    currentLevel: 1,
+    customTableNumber: 2
+};
+
+const levelConfigs = {
+    multiplication: {
+        1: { firstMax: 10, secondMin: 0, secondMax: 5 },
+        2: { firstMax: 10, secondMin: 5, secondMax: 10 },
+        3: { firstMax: 10, secondMin: 10, secondMax: 15 },
+        4: { firstMax: 10, secondMin: 15, secondMax: 20 }
+    },
+    addition: {
+        1: { maxSum: 20 },
+        2: { maxSum: 50 },
+        3: { maxSum: 100 },
+        4: { maxSum: 500 },
+        5: { maxSum: 1000 }
+    },
+    subtraction: {
+        1: { maxNumber: 20 },
+        2: { maxNumber: 50 },
+        3: { maxNumber: 100 },
+        4: { maxNumber: 500 },
+        5: { maxNumber: 1000 }
+    },
+    counting: {
+        1: { maxCount: 10, showAnswers: true },
+        2: { maxCount: 20, showAnswers: true },
+        3: { maxCount: 10, showAnswers: false },
+        4: { maxCount: 20, showAnswers: false }
+    }
+};
+
+function initWorksheet(operationType) {
+    worksheetConfig.operationType = operationType;
+    
+    if (operationType === 'addition') {
+        document.body.classList.add('addition-theme');
+    } else if (operationType === 'subtraction') {
+        document.body.classList.add('subtraction-theme');
+    } else if (operationType === 'counting') {
+        document.body.classList.add('counting-theme');
+    }
+    
+    document.querySelectorAll('.level-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            document.querySelectorAll('.level-btn').forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+            worksheetConfig.currentLevel = parseInt(this.dataset.level);
+            
+            if (operationType === 'multiplication') {
+                const customSelector = document.getElementById('customTableSelector');
+                const page2 = document.querySelectorAll('.worksheet')[1];
+                
+                if (worksheetConfig.currentLevel === 5) {
+                    customSelector.style.display = 'block';
+                    page2.style.display = 'none';
+                } else {
+                    customSelector.style.display = 'none';
+                    page2.style.display = 'block';
+                }
+            }
+            
+            // Update instructions for counting worksheet
+            if (operationType === 'counting') {
+                const instructionText = document.getElementById('instructionText');
+                if (instructionText) {
+                    if (worksheetConfig.currentLevel === 1 || worksheetConfig.currentLevel === 2) {
+                        instructionText.textContent = '👀 Count the objects on the left and draw a line to match with the correct number on the right! ✏️';
+                    } else {
+                        instructionText.textContent = '👀 Count the objects on the left and write the number in the box on the right! ✏️';
+                    }
+                }
+            }
+            
+            generateProblems();
+        });
+    });
+    
+    generateProblems();
 }
 
-.addition-theme {
-    --primary: #6BCF7F;
-    --secondary: #5DADE2;
-    --accent: #F8B739;
-    --bg: #F0FFF8;
+function applyCustomTable() {
+    const input = document.getElementById('customTableInput');
+    worksheetConfig.customTableNumber = parseInt(input.value);
+    if (worksheetConfig.customTableNumber < 1) worksheetConfig.customTableNumber = 1;
+    if (worksheetConfig.customTableNumber > 20) worksheetConfig.customTableNumber = 20;
+    input.value = worksheetConfig.customTableNumber;
+    generateProblems();
 }
 
-.subtraction-theme {
-    --primary: #FF6B6B;
-    --secondary: #4ECDC4;
-    --accent: #FFE66D;
-    --bg: #FFF8F0;
+function generateRandomNumber(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
-.counting-theme {
-    --primary: #FF6B9D;
-    --secondary: #C44569;
-    --accent: #FFA502;
-    --bg: #FFF5F7;
+function generateMultiplicationProblem(level) {
+    const config = levelConfigs.multiplication[level];
+    let multiplicand = generateRandomNumber(config.secondMin, config.secondMax);
+    let multiplier = generateRandomNumber(0, config.firstMax);
+    
+    return { multiplicand, multiplier };
 }
 
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
+function generateAdditionProblem(level) {
+    const config = levelConfigs.addition[level];
+    const maxNumber = config.maxSum;
+    
+    let addend1 = generateRandomNumber(1, maxNumber - 2);
+    let maxAddend2 = Math.min(maxNumber - addend1, maxNumber - 1);
+    let addend2 = generateRandomNumber(1, maxAddend2);
+    
+    return { addend1, addend2 };
 }
 
-body {
-    font-family: 'Patrick Hand', cursive;
-    background: linear-gradient(135deg, var(--bg) 0%, #FFF 100%);
-    min-height: 100vh;
-    padding: 20px;
+function generateSubtractionProblem(level) {
+    const config = levelConfigs.subtraction[level];
+    const maxNumber = config.maxNumber;
+    
+    let minuend = generateRandomNumber(1, maxNumber - 1);
+    let subtrahend = generateRandomNumber(0, minuend);
+    
+    return { minuend, subtrahend };
 }
 
-.controls {
-    max-width: 900px;
-    margin: 0 auto 30px;
-    background: white;
-    padding: 30px;
-    border-radius: 25px;
-    box-shadow: 0 15px 50px rgba(0,0,0,0.15);
-    border: 5px solid var(--secondary);
-    position: relative;
-    overflow: hidden;
+function generateCountingProblem(level) {
+    const config = levelConfigs.counting[level];
+    const maxCount = config.maxCount;
+    
+    const count = generateRandomNumber(1, maxCount);
+    
+    return { count };
 }
 
-.controls::before {
-    content: '';
-    position: absolute;
-    top: -50%;
-    right: -50%;
-    width: 200%;
-    height: 200%;
-    background: radial-gradient(circle, rgba(231, 76, 60, 0.1) 0%, transparent 70%);
-    animation: rotate 20s linear infinite;
-}
+function generateProblems() {
+    const grid1 = document.getElementById('problemsGrid1');
+    const grid2 = document.getElementById('problemsGrid2');
+    
+    if (grid1) grid1.innerHTML = '';
+    if (grid2) grid2.innerHTML = '';
 
-.addition-theme .controls::before {
-    background: radial-gradient(circle, rgba(78, 236, 196, 0.1) 0%, transparent 70%);
-}
+    const operationType = worksheetConfig.operationType;
+    const currentLevel = worksheetConfig.currentLevel;
 
-.subtraction-theme .controls::before {
-    background: radial-gradient(circle, rgba(255, 107, 107, 0.1) 0%, transparent 70%);
-}
-
-.counting-theme .controls::before {
-    background: radial-gradient(circle, rgba(255, 107, 157, 0.1) 0%, transparent 70%);
-}
-
-@keyframes rotate {
-    from { transform: rotate(0deg); }
-    to { transform: rotate(360deg); }
-}
-
-.controls > * {
-    position: relative;
-    z-index: 1;
-}
-
-.controls h1 {
-    font-family: 'Fredoka', sans-serif;
-    color: var(--primary);
-    font-size: 3em;
-    margin-bottom: 20px;
-    text-align: center;
-    text-shadow: 4px 4px 0 var(--accent), 8px 8px 0 rgba(0,0,0,0.1);
-    letter-spacing: 2px;
-}
-
-.level-selector {
-    display: flex;
-    gap: 15px;
-    flex-wrap: wrap;
-    justify-content: center;
-    margin-bottom: 20px;
-}
-
-.level-btn {
-    font-family: 'Fredoka', sans-serif;
-    padding: 12px 25px;
-    font-size: 1.1em;
-    border: 3px solid var(--dark);
-    background: white;
-    color: var(--dark);
-    cursor: pointer;
-    border-radius: 12px;
-    transition: all 0.3s ease;
-    font-weight: 700;
-}
-
-.level-btn:hover {
-    background: #f0f0f0;
-    transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-}
-
-.level-btn.active {
-    background: var(--primary);
-    color: white;
-}
-
-.action-buttons {
-    display: flex;
-    gap: 20px;
-    justify-content: center;
-}
-
-.refresh-btn, .print-btn {
-    font-family: 'Fredoka', sans-serif;
-    padding: 18px 45px;
-    font-size: 1.4em;
-    border: none;
-    border-radius: 20px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    font-weight: 700;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-}
-
-.refresh-btn {
-    background: linear-gradient(135deg, #7ED321 0%, #5FB300 100%);
-    color: white;
-    box-shadow: 0 8px 0 #5FB300, 0 10px 25px rgba(0,0,0,0.2);
-}
-
-.refresh-btn:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 11px 0 #5FB300, 0 13px 30px rgba(0,0,0,0.3);
-}
-
-.refresh-btn:active {
-    transform: translateY(5px);
-    box-shadow: 0 3px 0 #5FB300, 0 5px 15px rgba(0,0,0,0.2);
-}
-
-.print-btn {
-    background: linear-gradient(135deg, #4A90E2 0%, #357ABD 100%);
-    color: white;
-    box-shadow: 0 8px 0 #357ABD, 0 10px 25px rgba(0,0,0,0.2);
-}
-
-.print-btn:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 11px 0 #357ABD, 0 13px 30px rgba(0,0,0,0.3);
-}
-
-.print-btn:active {
-    transform: translateY(5px);
-    box-shadow: 0 3px 0 #357ABD, 0 5px 15px rgba(0,0,0,0.2);
-}
-
-.worksheet {
-    width: 8.5in;
-    height: 11in;
-    margin: 0 auto 30px;
-    background: white;
-    padding: 0.5in 0.6in;
-    box-shadow: 0 15px 60px rgba(0,0,0,0.2);
-    position: relative;
-}
-
-.worksheet:last-of-type {
-    margin-bottom: 0;
-}
-
-.worksheet-header {
-    text-align: center;
-    margin-bottom: 25px;
-    padding-bottom: 15px;
-    border-bottom: 2px solid #333;
-}
-
-.worksheet-header h2 {
-    font-family: 'Fredoka', sans-serif;
-    font-size: 2em;
-    color: #333;
-    margin-bottom: 8px;
-}
-
-.worksheet-info {
-    font-size: 1.1em;
-    color: #333;
-    display: flex;
-    justify-content: space-between;
-    padding: 0 20px;
-}
-
-.problems-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 5px 35px;
-    padding: 10px 20px;
-}
-
-.problem {
-    text-align: right;
-    font-size: 2.38em;
-    color: #333;
-    position: relative;
-    padding: 12px 15px;
-    background: white;
-    border-radius: 0;
-    border: none;
-    box-shadow: none;
-}
-
-.problem-number {
-    position: absolute;
-    top: -15px;
-    left: -15px;
-    background: #333;
-    color: white;
-    width: 35px;
-    height: 35px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-family: 'Fredoka', sans-serif;
-    font-size: 0.42em;
-    font-weight: 600;
-    border: 2px solid white;
-    box-shadow: 0 3px 8px rgba(0,0,0,0.2);
-}
-
-.multiplicand {
-    margin-bottom: 5px;
-}
-
-.multiplier {
-    padding-bottom: 10px;
-    border-bottom: 3px solid #333;
-    position: relative;
-    display: inline-block;
-    min-width: 60%;
-}
-
-.multiplier::before {
-    content: 'Ã—';
-    position: absolute;
-    left: -35px;
-    font-weight: bold;
-    color: #333;
-}
-
-.addend1 {
-    margin-bottom: 5px;
-}
-
-.addend2 {
-    padding-bottom: 10px;
-    border-bottom: 3px solid #333;
-    position: relative;
-    display: inline-block;
-    min-width: 60%;
-}
-
-.addend2::before {
-    content: '+';
-    position: absolute;
-    left: -35px;
-    font-weight: bold;
-    color: #333;
-}
-
-/* Subtraction specific */
-.minuend {
-    margin-bottom: 5px;
-}
-
-.subtrahend {
-    padding-bottom: 10px;
-    border-bottom: 3px solid #333;
-    position: relative;
-    display: inline-block;
-    min-width: 60%;
-}
-
-.subtrahend::before {
-    content: 'âˆ’';
-    position: absolute;
-    left: -35px;
-    font-weight: bold;
-    color: #333;
-}
-
-/* Counting specific */
-.counting-worksheet .worksheet {
-    padding: 0.6in;
-}
-
-.matching-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
-    padding: 5px 0;
-}
-
-.objects-display {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    font-size: 1.8em;
-    flex: 1;
-    filter: grayscale(100%);
-}
-
-.answer-number {
-    font-family: 'Comic Neue', cursive;
-    font-size: 2em;
-    color: #333;
-    font-weight: 700;
-    margin-left: auto;
-    padding-left: 40px;
-}
-
-.answer-box {
-    border: 2px solid #333;
-    width: 60px;
-    height: 60px;
-    margin-left: auto;
-    border-radius: 8px;
-    background: white;
-}
-
-.answer-line {
-    height: 50px;
-    margin-top: 8px;
-}
-
-@media print {
-    @page {
-        size: letter portrait;
-        margin: 0;
+    // Counting worksheet - special handling
+    if (operationType === 'counting') {
+        generateCountingWorksheet(currentLevel);
+        return;
     }
 
-    body {
-        background: white;
-        padding: 0;
+    // Custom table level for multiplication
+    if (operationType === 'multiplication' && currentLevel === 5) {
+        for (let i = 1; i <= 10; i++) {
+            const problemDiv = document.createElement('div');
+            problemDiv.className = 'problem';
+            problemDiv.innerHTML = `
+                <div class="problem-number">${i}</div>
+                <div class="multiplicand">${worksheetConfig.customTableNumber}</div>
+                <div class="multiplier">${i}</div>
+                <div class="answer-line"></div>
+            `;
+            grid1.appendChild(problemDiv);
+        }
+        return;
     }
 
-    .controls {
-        display: none;
+    // Generate problems for page 1
+    for (let i = 1; i <= 12; i++) {
+        const problem = operationType === 'multiplication' 
+            ? generateMultiplicationProblem(currentLevel)
+            : operationType === 'addition'
+            ? generateAdditionProblem(currentLevel)
+            : generateSubtractionProblem(currentLevel);
+        
+        const problemDiv = document.createElement('div');
+        problemDiv.className = 'problem';
+        
+        if (operationType === 'multiplication') {
+            problemDiv.innerHTML = `
+                <div class="problem-number">${i}</div>
+                <div class="multiplicand">${problem.multiplicand}</div>
+                <div class="multiplier">${problem.multiplier}</div>
+                <div class="answer-line"></div>
+            `;
+        } else if (operationType === 'addition') {
+            problemDiv.innerHTML = `
+                <div class="problem-number">${i}</div>
+                <div class="addend1">${problem.addend1}</div>
+                <div class="addend2">${problem.addend2}</div>
+                <div class="answer-line"></div>
+            `;
+        } else if (operationType === 'subtraction') {
+            problemDiv.innerHTML = `
+                <div class="problem-number">${i}</div>
+                <div class="minuend">${problem.minuend}</div>
+                <div class="subtrahend">${problem.subtrahend}</div>
+                <div class="answer-line"></div>
+            `;
+        }
+        
+        grid1.appendChild(problemDiv);
     }
 
-    .worksheet {
-        width: 8.5in;
-        height: 11in;
-        margin: 0;
-        box-shadow: none;
-        page-break-after: always;
-    }
-
-    .worksheet:last-of-type {
-        page-break-after: auto;
-    }
-
-    .problem {
-        break-inside: avoid;
+    // Generate problems for page 2
+    for (let i = 13; i <= 24; i++) {
+        const problem = operationType === 'multiplication' 
+            ? generateMultiplicationProblem(currentLevel)
+            : operationType === 'addition'
+            ? generateAdditionProblem(currentLevel)
+            : generateSubtractionProblem(currentLevel);
+        
+        const problemDiv = document.createElement('div');
+        problemDiv.className = 'problem';
+        
+        if (operationType === 'multiplication') {
+            problemDiv.innerHTML = `
+                <div class="problem-number">${i}</div>
+                <div class="multiplicand">${problem.multiplicand}</div>
+                <div class="multiplier">${problem.multiplier}</div>
+                <div class="answer-line"></div>
+            `;
+        } else if (operationType === 'addition') {
+            problemDiv.innerHTML = `
+                <div class="problem-number">${i}</div>
+                <div class="addend1">${problem.addend1}</div>
+                <div class="addend2">${problem.addend2}</div>
+                <div class="answer-line"></div>
+            `;
+        } else if (operationType === 'subtraction') {
+            problemDiv.innerHTML = `
+                <div class="problem-number">${i}</div>
+                <div class="minuend">${problem.minuend}</div>
+                <div class="subtrahend">${problem.subtrahend}</div>
+                <div class="answer-line"></div>
+            `;
+        }
+        
+        grid2.appendChild(problemDiv);
     }
 }
 
-@media screen and (max-width: 900px) {
-    .worksheet {
-        width: 100%;
-        height: auto;
-        padding: 30px;
+// Counting worksheet generation
+function generateCountingWorksheet(level) {
+    const container = document.getElementById('problemsGrid1');
+    container.innerHTML = '';
+    
+    const config = levelConfigs.counting[level];
+    const showAnswers = config.showAnswers;
+    
+    const symbolSet = [
+        '🐶', '🐱', '🐻', '🐰', '🐸',
+        '🦆', '🐠', '🐝', '🦋', '🐢',
+        '⭐', '🎈', '🎁', '⚽', '🚗',
+        '🍎', '🍌', '🍓', '🌸', '🌈'
+    ];
+    
+    function shuffle(array) {
+        const newArray = [...array];
+        for (let i = newArray.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+        }
+        return newArray;
     }
-
-    .problems-grid {
-        gap: 30px;
+    
+    const selectedSymbols = shuffle(symbolSet).slice(0, 10);
+    
+    const counts = Array.from({length: 10}, (_, i) => i + 1);
+    let selectedCounts;
+    if (config.maxCount === 20) {
+        const allCounts = Array.from({length: 20}, (_, i) => i + 1);
+        selectedCounts = shuffle(allCounts).slice(0, 10);
+    } else {
+        selectedCounts = counts;
     }
+    
+    const questions = selectedSymbols.map((symbol, index) => ({
+        symbol: symbol,
+        count: selectedCounts[index]
+    }));
+    
+    const displayQuestions = shuffle(questions);
+    const answersForMatching = showAnswers ? shuffle(displayQuestions.map(q => q.count)) : [];
+    
+    displayQuestions.forEach((q, index) => {
+        const rowDiv = document.createElement('div');
+        rowDiv.className = 'matching-row';
+        
+        const objectsDisplay = document.createElement('div');
+        objectsDisplay.className = 'objects-display';
+        
+        for (let i = 0; i < q.count; i++) {
+            const symbolSpan = document.createElement('span');
+            symbolSpan.textContent = q.symbol;
+            objectsDisplay.appendChild(symbolSpan);
+        }
+        
+        rowDiv.appendChild(objectsDisplay);
+        
+        if (showAnswers) {
+            const answerNumber = document.createElement('div');
+            answerNumber.className = 'answer-number';
+            answerNumber.textContent = answersForMatching[index];
+            rowDiv.appendChild(answerNumber);
+        } else {
+            const answerBox = document.createElement('div');
+            answerBox.className = 'answer-box';
+            rowDiv.appendChild(answerBox);
+        }
+        
+        container.appendChild(rowDiv);
+    });
 }
