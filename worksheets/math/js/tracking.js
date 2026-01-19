@@ -32,96 +32,43 @@ function generateTracing() {
     // LEVEL 1: Single letter filling
     if (window.currentLevel === 1) {
         const char = (document.getElementById('traceSymbol').value || 'A').toUpperCase();
-
-        const rowHeight = size * 1.5;
-        const areaHeight = output.clientHeight;
-        const numRows = Math.floor(areaHeight / rowHeight);
-
-        const spanWidth = size * 0.8;
-        const areaWidth = output.clientWidth;
-        const numCols = Math.floor(areaWidth / spanWidth);
-
-        for (let r = 0; r < numRows; r++) {
-            const row = document.createElement('div');
-            row.className = 'tracing-row';
-            for (let c = 0; c < numCols; c++) {
-                const span = document.createElement('span');
-                span.className = 'tracing-char';
-                span.textContent = char;
-                row.appendChild(span);
-            }
-            output.appendChild(row);
-        }
+        fillDivWithChar(output, char, size);
         return;
     }
 
     // LEVEL 2: Letter range
     if (window.currentLevel === 2) {
-        let startChar = (document.getElementById('traceSymbol').value || 'A').toUpperCase();
-        let endChar = (document.getElementById('traceCase').value || 'Z').toUpperCase();
-        const startCode = startChar.charCodeAt(0);
-        const endCode = endChar.charCodeAt(0);
+        let rangeInput = document.getElementById('traceSymbol').value || 'A-Z';
+        let [startChar, endChar] = rangeInput.toUpperCase().split('-');
+
+        if (!endChar) endChar = startChar; // default if single letter entered
+
         const letters = [];
-        for (let c = startCode; c <= endCode; c++) letters.push(String.fromCharCode(c));
-
-        const rowHeight = size * 1.5;
-        const areaHeight = output.clientHeight;
-        const numRows = Math.floor(areaHeight / rowHeight);
-
-        const spanWidth = size * 0.8;
-        const areaWidth = output.clientWidth;
-        const numCols = Math.floor(areaWidth / spanWidth);
-
-        for (let r = 0; r < numRows; r++) {
-            const row = document.createElement('div');
-            row.className = 'tracing-row';
-            for (let c = 0; c < numCols; c++) {
-                const span = document.createElement('span');
-                span.className = 'tracing-char';
-                span.textContent = letters[c % letters.length];
-                row.appendChild(span);
-            }
-            output.appendChild(row);
+        for (let c = startChar.charCodeAt(0); c <= endChar.charCodeAt(0); c++) {
+            letters.push(String.fromCharCode(c));
         }
+
+        fillDivWithSequence(output, letters, size);
         return;
     }
 
     // LEVEL 3: Numbers
     if (window.currentLevel === 3) {
-        const startNum = parseInt(document.getElementById('traceSymbol').value) || 0;
-        const endNum = parseInt(document.getElementById('traceCase').value) || 9;
+        let rangeInput = document.getElementById('traceSymbol').value || '0-9';
+        let [startNum, endNum] = rangeInput.split('-').map(Number);
+        if (isNaN(startNum)) startNum = 0;
+        if (isNaN(endNum)) endNum = 9;
+
         const numbers = [];
         for (let n = startNum; n <= endNum; n++) numbers.push(n);
 
-        const rowHeight = size * 1.5;
-        const areaHeight = output.clientHeight;
-        const numRows = Math.floor(areaHeight / rowHeight);
-
-        const spanWidth = size * 0.8;
-        const areaWidth = output.clientWidth;
-        const numCols = Math.floor(areaWidth / spanWidth);
-
-        for (let r = 0; r < numRows; r++) {
-            const row = document.createElement('div');
-            row.className = 'tracing-row';
-            for (let c = 0; c < numCols; c++) {
-                const span = document.createElement('span');
-                span.className = 'tracing-char';
-                span.textContent = numbers[(c + r * numCols) % numbers.length];
-                row.appendChild(span);
-            }
-            output.appendChild(row);
-        }
+        fillDivWithSequence(output, numbers, size);
         return;
     }
 
     // LEVEL 4: Custom text
     if (window.currentLevel === 4) {
         const text = document.getElementById('traceText').value || '';
-        const rowHeight = size * 1.5;
-        const areaHeight = output.clientHeight;
-        const numRows = Math.floor(areaHeight / rowHeight);
-
         const row = document.createElement('div');
         row.className = 'tracing-row';
         row.style.flexWrap = 'wrap';
@@ -135,5 +82,51 @@ function generateTracing() {
 
         output.appendChild(row);
         return;
+    }
+}
+
+// HELPER: fill div with a single char
+function fillDivWithChar(container, char, size) {
+    const rowHeight = size * 1.5;
+    const areaHeight = container.clientHeight;
+    const numRows = Math.floor(areaHeight / rowHeight);
+
+    const spanWidth = size * 0.8;
+    const areaWidth = container.clientWidth;
+    const numCols = Math.floor(areaWidth / spanWidth);
+
+    for (let r = 0; r < numRows; r++) {
+        const row = document.createElement('div');
+        row.className = 'tracing-row';
+        for (let c = 0; c < numCols; c++) {
+            const span = document.createElement('span');
+            span.className = 'tracing-char';
+            span.textContent = char;
+            row.appendChild(span);
+        }
+        container.appendChild(row);
+    }
+}
+
+// HELPER: fill div with a sequence (letters or numbers) repeatedly
+function fillDivWithSequence(container, sequence, size) {
+    const rowHeight = size * 1.5;
+    const areaHeight = container.clientHeight;
+    const numRows = Math.floor(areaHeight / rowHeight);
+
+    const spanWidth = size * 0.8;
+    const areaWidth = container.clientWidth;
+    const numCols = Math.floor(areaWidth / spanWidth);
+
+    for (let r = 0; r < numRows; r++) {
+        const row = document.createElement('div');
+        row.className = 'tracing-row';
+        for (let c = 0; c < numCols; c++) {
+            const span = document.createElement('span');
+            span.className = 'tracing-char';
+            span.textContent = sequence[c % sequence.length];
+            row.appendChild(span);
+        }
+        container.appendChild(row);
     }
 }
