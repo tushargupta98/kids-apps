@@ -1,17 +1,13 @@
 // tracing.js
 
-// Track the current level globally
 window.currentLevel = 1;
 
-// Set level function
 window.setTracingLevel = function(event, level) {
-    // Remove active class from all buttons
     document.querySelectorAll('.level-btn').forEach(btn => btn.classList.remove('active'));
     event.currentTarget.classList.add('active');
 
     window.currentLevel = level;
 
-    // Show/hide inputs based on level
     const traceSymbolInput = document.getElementById('traceSymbol');
     const traceCaseSelect = document.getElementById('traceCase');
     const traceTextArea = document.getElementById('traceText');
@@ -37,12 +33,10 @@ window.setTracingLevel = function(event, level) {
     generateTracing();
 };
 
-// Main generateTracing function
 window.generateTracing = function() {
     const output = document.getElementById('tracingOutput');
     output.innerHTML = '';
 
-    // Apply font size
     const size = document.getElementById('traceSize').value;
     document.documentElement.style.setProperty('--trace-size', size + 'px');
 
@@ -100,13 +94,15 @@ window.generateTracing = function() {
         return;
     }
 
-    // LEVEL 4: Custom text, one long line
+    // LEVEL 4: Custom text wrapped within div
     if (window.currentLevel === 4) {
         const text = document.getElementById('traceText').value.trim();
         if (!text) return;
 
+        // Break text into characters, wrap them in spans
         const row = document.createElement('div');
         row.className = 'tracing-row';
+        row.style.flexWrap = 'wrap'; // allow wrapping within container
 
         text.split('').forEach(ch => {
             const span = document.createElement('span');
