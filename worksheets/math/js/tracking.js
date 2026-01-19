@@ -105,19 +105,39 @@ if (window.currentLevel === 1) {
         return;
     }
 
-    // LEVEL 3: Numbers 0–9 repeated in one row
-    if (window.currentLevel === 3) {
+    // LEVEL 3: Numbers filling the div
+if (window.currentLevel === 3) {
+    let startNum = parseInt(document.getElementById('traceSymbol').value) || 0;
+    let endNum = parseInt(document.getElementById('traceCase').value) || 9; // use select for range if needed
+    if (startNum > endNum) [startNum, endNum] = [endNum, startNum];
+
+    const numbers = [];
+    for (let n = startNum; n <= endNum; n++) numbers.push(n);
+
+    const rowHeight = parseInt(size) * 1.5; // approx row height
+    const areaHeight = output.clientHeight;
+    const numRows = Math.floor(areaHeight / rowHeight);
+
+    const spanWidth = parseInt(size) * 0.8; // approximate width per number
+    const areaWidth = output.clientWidth;
+    const numCols = Math.floor(areaWidth / spanWidth);
+
+    for (let r = 0; r < numRows; r++) {
         const row = document.createElement('div');
         row.className = 'tracing-row';
-        for (let i = 0; i <= 9; i++) {
+
+        for (let c = 0; c < numCols; c++) {
             const span = document.createElement('span');
             span.className = 'tracing-char';
-            span.textContent = i;
+            span.textContent = numbers[(c + r * numCols) % numbers.length]; // cycle numbers
             row.appendChild(span);
         }
+
         output.appendChild(row);
-        return;
     }
+    return;
+}
+
 
     // LEVEL 4: Custom text wrapped within div
     if (window.currentLevel === 4) {
