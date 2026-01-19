@@ -306,7 +306,7 @@ body {
 }
 
 .subtrahend::before {
-    content: 'âˆ’';
+    content: '-';
     position: absolute;
     left: -35px;
     font-weight: bold;
