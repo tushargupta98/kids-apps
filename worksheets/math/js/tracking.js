@@ -100,44 +100,22 @@ window.generateTracing = function() {
         return;
     }
 
-    // LEVEL 4: Custom text, reformatted across multiple rows
+    // LEVEL 4: Custom text, one long line
     if (window.currentLevel === 4) {
         const text = document.getElementById('traceText').value.trim();
         if (!text) return;
 
-        const words = text.split(' ');
-        let row = document.createElement('div');
+        const row = document.createElement('div');
         row.className = 'tracing-row';
-        let charCount = 0;
-        const maxCharsPerRow = 15; // adjust row width
 
-        words.forEach(word => {
-            if (charCount + word.length > maxCharsPerRow) {
-                // append current row and start a new one
-                output.appendChild(row);
-                row = document.createElement('div');
-                row.className = 'tracing-row';
-                charCount = 0;
-            }
-
-            // append each character of the word
-            word.split('').forEach(ch => {
-                const span = document.createElement('span');
-                span.className = 'tracing-char';
-                span.textContent = ch;
-                row.appendChild(span);
-                charCount++;
-            });
-
-            // add space after the word
-            const space = document.createElement('span');
-            space.className = 'tracing-char';
-            space.textContent = ' ';
-            row.appendChild(space);
-            charCount++;
+        text.split('').forEach(ch => {
+            const span = document.createElement('span');
+            span.className = 'tracing-char';
+            span.textContent = ch;
+            row.appendChild(span);
         });
 
-        if (row.childNodes.length > 0) output.appendChild(row);
+        output.appendChild(row);
         return;
     }
 };
