@@ -49,22 +49,36 @@ window.generateTracing = function() {
     output.style.fontFamily = font;
 
     // LEVEL 1: Single alphabet repeated in one row
-    if (window.currentLevel === 1) {
-        const symbol = document.getElementById('traceSymbol').value || 'A';
-        const casing = document.getElementById('traceCase').value;
-        const ch = casing === 'upper' ? symbol.toUpperCase() : symbol.toLowerCase();
+    // LEVEL 1: Single alphabet filling the entire worksheet
+if (window.currentLevel === 1) {
+    const symbol = document.getElementById('traceSymbol').value || 'A';
+    const casing = document.getElementById('traceCase').value;
+    const ch = casing === 'upper' ? symbol.toUpperCase() : symbol.toLowerCase();
 
+    const rowHeight = parseInt(size) * 1.5; // approx row height based on font-size
+    const areaHeight = output.clientHeight;
+    const numRows = Math.floor(areaHeight / rowHeight);
+
+    const spanWidth = parseInt(size) * 0.8; // approximate width per char
+    const areaWidth = output.clientWidth;
+    const numCols = Math.floor(areaWidth / spanWidth);
+
+    for (let r = 0; r < numRows; r++) {
         const row = document.createElement('div');
         row.className = 'tracing-row';
-        for (let i = 0; i < 12; i++) {
+
+        for (let c = 0; c < numCols; c++) {
             const span = document.createElement('span');
             span.className = 'tracing-char';
             span.textContent = ch;
             row.appendChild(span);
         }
+
         output.appendChild(row);
-        return;
     }
+    return;
+}
+
 
     // LEVEL 2: All alphabets repeated per row with optional range
     if (window.currentLevel === 2) {
