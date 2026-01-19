@@ -4,17 +4,24 @@
     <meta charset="UTF-8">
     <title>Tracing Worksheets</title>
 
-    <!-- Existing CSS -->
-    <link rel="stylesheet" href="css/worksheet.css">
+    <!-- ✅ FIXED CSS PATH -->
+    <link rel="stylesheet" href="../css/worksheet.css">
 
-    <!-- Tracing font -->
     <style>
+        /* ✅ FIXED FONT PATH */
         @font-face {
             font-family: 'KG Primary Dots';
-            src: url('fonts/kg_primary_dots/KGPrimaryDots.ttf') format('truetype');
+            src: url('../fonts/kg_primary_dots/KGPrimaryDots.ttf') format('truetype');
+            font-weight: normal;
+            font-style: normal;
         }
 
-        /* Tracing-only additions */
+        /* ✅ DEFAULT SIZE */
+        :root {
+            --trace-size: 72px;
+        }
+
+        /* Tracing-only styling */
         .tracing-worksheet {
             font-family: 'KG Primary Dots', cursive;
         }
@@ -44,10 +51,10 @@
     <h1>Tracing Practice</h1>
 
     <div class="level-selector">
-        <button class="level-btn active" onclick="setTracingLevel(1)">Alphabet (Single)</button>
-        <button class="level-btn" onclick="setTracingLevel(2)">Alphabet (All)</button>
-        <button class="level-btn" onclick="setTracingLevel(3)">Numbers</button>
-        <button class="level-btn" onclick="setTracingLevel(4)">Custom Text</button>
+        <button class="level-btn active" onclick="setTracingLevel(event, 1)">Alphabet (Single)</button>
+        <button class="level-btn" onclick="setTracingLevel(event, 2)">Alphabet (All)</button>
+        <button class="level-btn" onclick="setTracingLevel(event, 3)">Numbers</button>
+        <button class="level-btn" onclick="setTracingLevel(event, 4)">Custom Text</button>
     </div>
 
     <div class="level-selector">
@@ -78,11 +85,11 @@
     <div id="tracingOutput" class="tracing-area"></div>
 </div>
 
-<!-- Existing JS (loaded but unused here) -->
-<script src="js/worksheet.js"></script>
+<!-- ❌ DO NOT load worksheet.js here -->
+<!-- It breaks tracing page -->
 
-<!-- Tracing-only JS -->
-<script src="js/tracing.js"></script>
+<!-- ✅ Tracing-only JS -->
+<script src="../js/tracing.js"></script>
 
 </body>
 </html>
