@@ -13,6 +13,20 @@
     --bg: #F0FFF8;
 }
 
+.subtraction-theme {
+    --primary: #FF6B6B;
+    --secondary: #4ECDC4;
+    --accent: #FFE66D;
+    --bg: #FFF8F0;
+}
+
+.counting-theme {
+    --primary: #FF6B9D;
+    --secondary: #C44569;
+    --accent: #FFA502;
+    --bg: #FFF5F7;
+}
+
 * {
     margin: 0;
     padding: 0;
@@ -51,6 +65,14 @@ body {
 
 .addition-theme .controls::before {
     background: radial-gradient(circle, rgba(78, 236, 196, 0.1) 0%, transparent 70%);
+}
+
+.subtraction-theme .controls::before {
+    background: radial-gradient(circle, rgba(255, 107, 107, 0.1) 0%, transparent 70%);
+}
+
+.counting-theme .controls::before {
+    background: radial-gradient(circle, rgba(255, 107, 157, 0.1) 0%, transparent 70%);
 }
 
 @keyframes rotate {
@@ -243,7 +265,7 @@ body {
 }
 
 .multiplier::before {
-    content: '×';
+    content: 'Ã—';
     position: absolute;
     left: -35px;
     font-weight: bold;
@@ -268,6 +290,67 @@ body {
     left: -35px;
     font-weight: bold;
     color: #333;
+}
+
+/* Subtraction specific */
+.minuend {
+    margin-bottom: 5px;
+}
+
+.subtrahend {
+    padding-bottom: 10px;
+    border-bottom: 3px solid #333;
+    position: relative;
+    display: inline-block;
+    min-width: 60%;
+}
+
+.subtrahend::before {
+    content: 'âˆ’';
+    position: absolute;
+    left: -35px;
+    font-weight: bold;
+    color: #333;
+}
+
+/* Counting specific */
+.counting-worksheet .worksheet {
+    padding: 0.6in;
+}
+
+.matching-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding: 5px 0;
+}
+
+.objects-display {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    font-size: 1.8em;
+    flex: 1;
+    filter: grayscale(100%);
+}
+
+.answer-number {
+    font-family: 'Comic Neue', cursive;
+    font-size: 2em;
+    color: #333;
+    font-weight: 700;
+    margin-left: auto;
+    padding-left: 40px;
+}
+
+.answer-box {
+    border: 2px solid #333;
+    width: 60px;
+    height: 60px;
+    margin-left: auto;
+    border-radius: 8px;
+    background: white;
 }
 
 .answer-line {
