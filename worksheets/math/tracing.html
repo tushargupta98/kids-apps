@@ -2,25 +2,23 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tracing Worksheets</title>
 
-    <!-- ✅ FIXED CSS PATH -->
-    <link rel="stylesheet" href="../../css/worksheet.css">
+    <!-- ✅ SAME CSS AS ADDITION -->
+    <link rel="stylesheet" href="css/styles.css">
 
+    <!-- ✅ Tracing Font -->
     <style>
-        /* ✅ FIXED FONT PATH */
         @font-face {
             font-family: 'KG Primary Dots';
-            src: url('../../fonts/kg_primary_dots/KGPrimaryDots.ttf') format('truetype');
-            font-weight: normal;
-            font-style: normal;
+            src: url('fonts/kg_primary_dots/KGPrimaryDots.ttf') format('truetype');
         }
 
         :root {
             --trace-size: 72px;
         }
 
-        /* Tracing-only styling */
         .tracing-worksheet {
             font-family: 'KG Primary Dots', cursive;
         }
@@ -28,7 +26,7 @@
         .tracing-area {
             height: calc(11in - 2in);
             overflow: hidden;
-            padding-top: 12px;
+            padding-top: 10px;
         }
 
         .tracing-row {
@@ -43,11 +41,11 @@
             margin-right: 20px;
         }
 
-        /* Hide unused inputs cleanly */
+        /* Hide custom text unless level 4 */
         #traceText {
+            display: none;
             width: 100%;
             min-height: 60px;
-            display: none;
         }
     </style>
 </head>
@@ -55,7 +53,7 @@
 <body>
 
 <div class="controls">
-    <h1>Tracing Practice</h1>
+    <h1>✏️ Tracing Practice</h1>
 
     <div class="level-selector">
         <button class="level-btn active" onclick="setTracingLevel(event, 1)">Alphabet (Single)</button>
@@ -75,8 +73,8 @@
     </div>
 
     <div class="action-buttons">
-        <button class="refresh-btn" onclick="generateTracing()">Generate</button>
-        <button class="print-btn" onclick="window.print()">Print</button>
+        <button class="refresh-btn" onclick="generateTracing()">🔄 Generate</button>
+        <button class="print-btn" onclick="window.print()">🖨️ Print</button>
     </div>
 </div>
 
@@ -84,8 +82,8 @@
     <div class="worksheet-header">
         <h2>Tracing Worksheet</h2>
         <div class="worksheet-info">
-            <span>Name: __________</span>
-            <span>Date: __________</span>
+            <span>Name: _________________</span>
+            <span>Date: _________________</span>
         </div>
     </div>
 
@@ -93,7 +91,7 @@
 </div>
 
 <!-- ✅ Tracing-only JS -->
-<script src="../../js/tracing.js"></script>
+<script src="js/tracing.js"></script>
 
 </body>
 </html>
