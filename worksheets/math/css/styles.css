@@ -401,3 +401,11 @@ body {
         gap: 30px;
     }
 }
+
+@font-face {
+    font-family: 'KG Primary Dots';
+    src: url('./fonts/KGPrimaryDots.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+
