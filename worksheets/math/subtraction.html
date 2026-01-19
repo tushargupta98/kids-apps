@@ -1,1 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Subtraction Practice Worksheet</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@600&family=Patrick+Hand&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #FF6B6B;
+            --secondary: #4ECDC4;
+            --accent: #FFE66D;
+            --dark: #2C3E50;
+            --bg: #FFF8F0;
+        }
 
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Patrick Hand', cursive;
+            background: linear-gradient(135deg, var(--bg) 0%, #FFF 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .controls {
+            max-width: 800px;
+            margin: 0 auto 30px;
+            background: white;
+            padding: 25px;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            border: 4px solid var(--secondary);
+        }
+
+        .controls h1 {
+            font-family: 'Fredoka', sans-serif;
+            color: var(--primary);
+            font-size: 2.5em;
+            margin-bottom: 20px;
+            text-align: center;
+            text-shadow: 3px 3px 0 var(--accent);
+            letter-spacing: 2px;
+        }
+
+        .level-selector {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .level-btn {
+            font-family: 'Fredoka', sans-serif;
+            padding: 15px 30px;
+            font-size: 1.2em;
+            border: 3px solid var(--dark);
+            background: white;
+            color: var(--dark);
+            cursor: pointer;
+            border-radius: 15px;
+            transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .level-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: var(--secondary);
+            transition: left 0.3s ease;
+            z-index: -1;
+        }
+
+        .level-btn:hover::before {
+            left: 0;
+        }
+
+        .level-btn:hover {
+            color: white;
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+        }
+
+        .level-btn.active {
+            background: var(--primary);
+            color: white;
+            transform: scale(1.1);
+            box-shadow: 0 10px 25px rgba(255, 107, 107, 0.4);
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+        }
+
+        .refresh-btn, .print-btn {
+            font-family: 'Fredoka', sans-serif;
+            padding: 15px 40px;
+            font-size: 1.3em;
+            border: none;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            letter-spacing: 1px;
+        }
+
+        .refresh-btn {
+            background: var(--accent);
+            color: var(--dark);
+            box-shadow: 0 6px 0 #E6CF5E, 0 8px 20px rgba(0,0,0,0.2);
+        }
+
+        .refresh-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 0 #E6CF5E, 0 10px 25px rgba(0,0,0,0.3);
+        }
+
+        .refresh-btn:active {
+            transform: translateY(4px);
+            box-shadow: 0 2px 0 #E6CF5E, 0 4px 10px rgba(0,0,0,0.2);
+        }
+
+        .print-btn {
+            background: var(--secondary);
+            color: white;
+            box-shadow: 0 6px 0 #3DB3AB, 0 8px 20px rgba(0,0,0,0.2);
+        }
+
+        .print-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 0 #3DB3AB, 0 10px 25px rgba(0,0,0,0.3);
+        }
+
+        .print-btn:active {
+            transform: translateY(4px);
+            box-shadow: 0 2px 0 #3DB3AB, 0 4px 10px rgba(0,0,0,0.2);
+        }
+
+        .worksheet {
+            width: 8.5in;
+            height: 11in;
+            margin: 0 auto;
+            background: white;
+            padding: 0.5in 0.6in;
+            box-shadow: 0 10px 50px rgba(0,0,0,0.15);
+            position: relative;
+        }
+
+        .worksheet-header {
+            text-align: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 4px dashed var(--secondary);
+        }
+
+        .worksheet-header h2 {
+            font-family: 'Fredoka', sans-serif;
+            font-size: 2em;
+            color: var(--primary);
+            margin-bottom: 8px;
+            text-shadow: 2px 2px 0 var(--accent);
+        }
+
+        .worksheet-info {
+            font-size: 1.1em;
+            color: var(--dark);
+            display: flex;
+            justify-content: space-between;
+            padding: 0 20px;
+        }
+
+        .problems-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 30px 40px;
+            padding: 10px 20px;
+        }
+
+        .problem {
+            text-align: right;
+            font-size: 1.6em;
+            color: var(--dark);
+            position: relative;
+            padding: 12px 15px;
+            background: linear-gradient(135deg, #FFF 0%, var(--bg) 100%);
+            border-radius: 15px;
+            border: 3px solid var(--secondary);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .problem-number {
+            position: absolute;
+            top: -15px;
+            left: -15px;
+            background: var(--primary);
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Fredoka', sans-serif;
+            font-size: 0.6em;
+            font-weight: 600;
+            border: 3px solid white;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
+
+        .minuend {
+            margin-bottom: 5px;
+        }
+
+        .subtrahend {
+            padding-bottom: 10px;
+            border-bottom: 4px solid var(--dark);
+            position: relative;
+        }
+
+        .subtrahend::before {
+            content: '−';
+            position: absolute;
+            left: -35px;
+            font-weight: bold;
+            color: var(--primary);
+        }
+
+        .answer-line {
+            height: 50px;
+            margin-top: 8px;
+        }
+
+        /* Print styles */
+        @media print {
+            @page {
+                size: letter portrait;
+                margin: 0;
+            }
+
+            body {
+                background: white;
+                padding: 0;
+            }
+
+            .controls {
+                display: none;
+            }
+
+            .worksheet {
+                width: 8.5in;
+                height: 11in;
+                margin: 0;
+                box-shadow: none;
+                page-break-after: always;
+            }
+
+            .problem {
+                break-inside: avoid;
+            }
+        }
+
+        @media screen and (max-width: 900px) {
+            .worksheet {
+                width: 100%;
+                height: auto;
+                padding: 30px;
+            }
+
+            .problems-grid {
+                gap: 30px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="controls">
+        <h1>✏️ Subtraction Practice ✏️</h1>
+        
+        <div class="level-selector">
+            <button class="level-btn active" data-level="20">&lt; 20</button>
+            <button class="level-btn" data-level="50">&lt; 50</button>
+            <button class="level-btn" data-level="100">&lt; 100</button>
+            <button class="level-btn" data-level="500">&lt; 500</button>
+            <button class="level-btn" data-level="1000">&lt; 1000</button>
+        </div>
+
+        <div class="action-buttons">
+            <button class="refresh-btn" onclick="generateProblems()">🔄 New Problems</button>
+            <button class="print-btn" onclick="window.print()">🖨️ Print</button>
+        </div>
+    </div>
+
+    <div class="worksheet">
+        <div class="worksheet-header">
+            <h2>Subtraction Worksheet</h2>
+            <div class="worksheet-info">
+                <span>Name: _________________</span>
+                <span>Date: _________________</span>
+            </div>
+        </div>
+
+        <div class="problems-grid" id="problemsGrid"></div>
+    </div>
+
+    <script>
+        let currentLevel = 20;
+
+        // Level selection
+        document.querySelectorAll('.level-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.level-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                currentLevel = parseInt(this.dataset.level);
+                generateProblems();
+            });
+        });
+
+        function generateRandomNumber(max) {
+            return Math.floor(Math.random() * max) + 1;
+        }
+
+        function generateSubtractionProblem(maxNumber) {
+            let minuend = generateRandomNumber(maxNumber - 1);
+            let subtrahend = generateRandomNumber(minuend); // Ensures non-negative result
+            
+            return {
+                minuend: minuend,
+                subtrahend: subtrahend
+            };
+        }
+
+        function generateProblems() {
+            const grid = document.getElementById('problemsGrid');
+            grid.innerHTML = '';
+
+            for (let i = 1; i <= 12; i++) {
+                const problem = generateSubtractionProblem(currentLevel);
+                
+                const problemDiv = document.createElement('div');
+                problemDiv.className = 'problem';
+                problemDiv.innerHTML = `
+                    <div class="problem-number">${i}</div>
+                    <div class="minuend">${problem.minuend}</div>
+                    <div class="subtrahend">${problem.subtrahend}</div>
+                    <div class="answer-line"></div>
+                `;
+                
+                grid.appendChild(problemDiv);
+            }
+        }
+
+        // Generate initial problems
+        generateProblems();
+    </script>
+</body>
+</html>
