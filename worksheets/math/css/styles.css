@@ -409,3 +409,27 @@ body {
     font-style: normal;
 }
 
+/* ================= TRACING ONLY ================= */
+
+.tracing-worksheet {
+    font-family: 'KG Primary Dots', cursive;
+}
+
+.tracing-area {
+    width: 100%;
+    height: calc(11in - 2in);
+    overflow: hidden;
+}
+
+.tracing-row {
+    display: flex;
+    white-space: nowrap;
+    margin-bottom: 14px;
+}
+
+.tracing-char {
+    font-size: var(--trace-size);
+    line-height: 1.4;
+    margin-right: 18px;
+}
+
