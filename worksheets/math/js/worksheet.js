@@ -17,6 +17,19 @@ const levelConfigs = {
         3: { maxSum: 100 },
         4: { maxSum: 500 },
         5: { maxSum: 1000 }
+    },
+    subtraction: {
+        1: { maxNumber: 20 },
+        2: { maxNumber: 50 },
+        3: { maxNumber: 100 },
+        4: { maxNumber: 500 },
+        5: { maxNumber: 1000 }
+    },
+    counting: {
+        1: { maxCount: 10, showAnswers: true },
+        2: { maxCount: 20, showAnswers: true },
+        3: { maxCount: 10, showAnswers: false },
+        4: { maxCount: 20, showAnswers: false }
     }
 };
 
@@ -25,6 +38,10 @@ function initWorksheet(operationType) {
     
     if (operationType === 'addition') {
         document.body.classList.add('addition-theme');
+    } else if (operationType === 'subtraction') {
+        document.body.classList.add('subtraction-theme');
+    } else if (operationType === 'counting') {
+        document.body.classList.add('counting-theme');
     }
     
     document.querySelectorAll('.level-btn').forEach(btn => {
@@ -43,6 +60,18 @@ function initWorksheet(operationType) {
                 } else {
                     customSelector.style.display = 'none';
                     page2.style.display = 'block';
+                }
+            }
+            
+            // Update instructions for counting worksheet
+            if (operationType === 'counting') {
+                const instructionText = document.getElementById('instructionText');
+                if (instructionText) {
+                    if (worksheetConfig.currentLevel === 1 || worksheetConfig.currentLevel === 2) {
+                        instructionText.textContent = '👀 Count the objects on the left and draw a line to match with the correct number on the right! ✏️';
+                    } else {
+                        instructionText.textContent = '👀 Count the objects on the left and write the number in the box on the right! ✏️';
+                    }
                 }
             }
             
@@ -85,15 +114,42 @@ function generateAdditionProblem(level) {
     return { addend1, addend2 };
 }
 
+function generateSubtractionProblem(level) {
+    const config = levelConfigs.subtraction[level];
+    const maxNumber = config.maxNumber;
+    
+    let minuend = generateRandomNumber(1, maxNumber - 1);
+    let subtrahend = generateRandomNumber(0, minuend);
+    
+    return { minuend, subtrahend };
+}
+
+function generateCountingProblem(level) {
+    const config = levelConfigs.counting[level];
+    const maxCount = config.maxCount;
+    
+    const count = generateRandomNumber(1, maxCount);
+    
+    return { count };
+}
+
 function generateProblems() {
     const grid1 = document.getElementById('problemsGrid1');
     const grid2 = document.getElementById('problemsGrid2');
-    grid1.innerHTML = '';
-    grid2.innerHTML = '';
+    
+    if (grid1) grid1.innerHTML = '';
+    if (grid2) grid2.innerHTML = '';
 
     const operationType = worksheetConfig.operationType;
     const currentLevel = worksheetConfig.currentLevel;
 
+    // Counting worksheet - special handling
+    if (operationType === 'counting') {
+        generateCountingWorksheet(currentLevel);
+        return;
+    }
+
+    // Custom table level for multiplication
     if (operationType === 'multiplication' && currentLevel === 5) {
         for (let i = 1; i <= 10; i++) {
             const problemDiv = document.createElement('div');
@@ -109,10 +165,13 @@ function generateProblems() {
         return;
     }
 
+    // Generate problems for page 1
     for (let i = 1; i <= 12; i++) {
         const problem = operationType === 'multiplication' 
             ? generateMultiplicationProblem(currentLevel)
-            : generateAdditionProblem(currentLevel);
+            : operationType === 'addition'
+            ? generateAdditionProblem(currentLevel)
+            : generateSubtractionProblem(currentLevel);
         
         const problemDiv = document.createElement('div');
         problemDiv.className = 'problem';
@@ -124,11 +183,18 @@ function generateProblems() {
                 <div class="multiplier">${problem.multiplier}</div>
                 <div class="answer-line"></div>
             `;
-        } else {
+        } else if (operationType === 'addition') {
             problemDiv.innerHTML = `
                 <div class="problem-number">${i}</div>
                 <div class="addend1">${problem.addend1}</div>
                 <div class="addend2">${problem.addend2}</div>
+                <div class="answer-line"></div>
+            `;
+        } else if (operationType === 'subtraction') {
+            problemDiv.innerHTML = `
+                <div class="problem-number">${i}</div>
+                <div class="minuend">${problem.minuend}</div>
+                <div class="subtrahend">${problem.subtrahend}</div>
                 <div class="answer-line"></div>
             `;
         }
@@ -136,10 +202,13 @@ function generateProblems() {
         grid1.appendChild(problemDiv);
     }
 
+    // Generate problems for page 2
     for (let i = 13; i <= 24; i++) {
         const problem = operationType === 'multiplication' 
             ? generateMultiplicationProblem(currentLevel)
-            : generateAdditionProblem(currentLevel);
+            : operationType === 'addition'
+            ? generateAdditionProblem(currentLevel)
+            : generateSubtractionProblem(currentLevel);
         
         const problemDiv = document.createElement('div');
         problemDiv.className = 'problem';
@@ -151,15 +220,95 @@ function generateProblems() {
                 <div class="multiplier">${problem.multiplier}</div>
                 <div class="answer-line"></div>
             `;
-        } else {
+        } else if (operationType === 'addition') {
             problemDiv.innerHTML = `
                 <div class="problem-number">${i}</div>
                 <div class="addend1">${problem.addend1}</div>
                 <div class="addend2">${problem.addend2}</div>
                 <div class="answer-line"></div>
             `;
+        } else if (operationType === 'subtraction') {
+            problemDiv.innerHTML = `
+                <div class="problem-number">${i}</div>
+                <div class="minuend">${problem.minuend}</div>
+                <div class="subtrahend">${problem.subtrahend}</div>
+                <div class="answer-line"></div>
+            `;
         }
         
         grid2.appendChild(problemDiv);
     }
+}
+
+// Counting worksheet generation
+function generateCountingWorksheet(level) {
+    const container = document.getElementById('problemsGrid1');
+    container.innerHTML = '';
+    
+    const config = levelConfigs.counting[level];
+    const showAnswers = config.showAnswers;
+    
+    const symbolSet = [
+        '🐶', '🐱', '🐻', '🐰', '🐸',
+        '🦆', '🐠', '🐝', '🦋', '🐢',
+        '⭐', '🎈', '🎁', '⚽', '🚗',
+        '🍎', '🍌', '🍓', '🌸', '🌈'
+    ];
+    
+    function shuffle(array) {
+        const newArray = [...array];
+        for (let i = newArray.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+        }
+        return newArray;
+    }
+    
+    const selectedSymbols = shuffle(symbolSet).slice(0, 10);
+    
+    const counts = Array.from({length: 10}, (_, i) => i + 1);
+    let selectedCounts;
+    if (config.maxCount === 20) {
+        const allCounts = Array.from({length: 20}, (_, i) => i + 1);
+        selectedCounts = shuffle(allCounts).slice(0, 10);
+    } else {
+        selectedCounts = counts;
+    }
+    
+    const questions = selectedSymbols.map((symbol, index) => ({
+        symbol: symbol,
+        count: selectedCounts[index]
+    }));
+    
+    const displayQuestions = shuffle(questions);
+    const answersForMatching = showAnswers ? shuffle(displayQuestions.map(q => q.count)) : [];
+    
+    displayQuestions.forEach((q, index) => {
+        const rowDiv = document.createElement('div');
+        rowDiv.className = 'matching-row';
+        
+        const objectsDisplay = document.createElement('div');
+        objectsDisplay.className = 'objects-display';
+        
+        for (let i = 0; i < q.count; i++) {
+            const symbolSpan = document.createElement('span');
+            symbolSpan.textContent = q.symbol;
+            objectsDisplay.appendChild(symbolSpan);
+        }
+        
+        rowDiv.appendChild(objectsDisplay);
+        
+        if (showAnswers) {
+            const answerNumber = document.createElement('div');
+            answerNumber.className = 'answer-number';
+            answerNumber.textContent = answersForMatching[index];
+            rowDiv.appendChild(answerNumber);
+        } else {
+            const answerBox = document.createElement('div');
+            answerBox.className = 'answer-box';
+            rowDiv.appendChild(answerBox);
+        }
+        
+        container.appendChild(rowDiv);
+    });
 }
