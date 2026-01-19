@@ -265,7 +265,7 @@ body {
 }
 
 .multiplier::before {
-    content: 'Ã—';
+    content: 'X';
     position: absolute;
     left: -35px;
     font-weight: bold;
