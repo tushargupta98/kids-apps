@@ -76,6 +76,24 @@
         <button class="refresh-btn" onclick="generateTracing()">🔄 Generate</button>
         <button class="print-btn" onclick="window.print()">🖨️ Print</button>
     </div>
+
+    <div class="level-selector">
+    <!-- Font selection for all levels -->
+    <label for="traceFont">Font:</label>
+    <select id="traceFont" onchange="generateTracing()">
+        <option value="KG Primary Dots">KG Primary Dots</option>
+        <option value="Patrick Hand">Patrick Hand</option>
+        <option value="Fredoka">Fredoka</option>
+        <option value="Comic Neue">Comic Neue</option>
+    </select>
+
+    <!-- Alphabet range for level 2 -->
+    <label for="rangeStart">From:</label>
+    <input type="text" id="rangeStart" maxlength="1" size="1" value="A">
+    <label for="rangeEnd">To:</label>
+    <input type="text" id="rangeEnd" maxlength="1" size="1" value="Z">
+</div>
+
 </div>
 
 <div class="worksheet tracing-worksheet">
