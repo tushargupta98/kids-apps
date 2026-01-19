@@ -1,58 +1,57 @@
-let currentLevel = 1;
+// ----- GLOBAL STATE -----
+window.currentLevel = 1;
 
-function setTracingLevel(event, level) {
-    currentLevel = level;
+// ----- LEVEL SELECTION -----
+window.setTracingLevel = function(event, level) {
+    window.currentLevel = level;
 
-    // Button active state
     document.querySelectorAll('.level-btn').forEach(btn => {
         btn.classList.remove('active');
     });
+
     event.target.classList.add('active');
 
-    // Toggle custom text
     document.getElementById('traceText').style.display =
         level === 4 ? 'block' : 'none';
 }
 
-function generateTracing() {
+// ----- GENERATE -----
+window.generateTracing = function() {
     const output = document.getElementById('tracingOutput');
     output.innerHTML = '';
 
     const size = document.getElementById('traceSize').value;
     document.documentElement.style.setProperty('--trace-size', size + 'px');
 
-    let rows = [];
     let symbols = [];
 
-    if (currentLevel === 1) {
+    if (window.currentLevel === 1) {
         const symbol = document.getElementById('traceSymbol').value || 'A';
         const casing = document.getElementById('traceCase').value;
-        const char = casing === 'upper'
-            ? symbol.toUpperCase()
-            : symbol.toLowerCase();
-
-        symbols = Array(20).fill(char);
-    }
-
-    if (currentLevel === 2) {
-        const casing = document.getElementById('traceCase').value;
-        const start = casing === 'upper' ? 65 : 97;
-        symbols = Array.from({ length: 26 }, (_, i) =>
-            String.fromCharCode(start + i)
+        symbols = Array(20).fill(
+            casing === 'upper' ? symbol.toUpperCase() : symbol.toLowerCase()
         );
     }
 
-    if (currentLevel === 3) {
+    if (window.currentLevel === 2) {
+        const casing = document.getElementById('traceCase').value;
+        const base = casing === 'upper' ? 65 : 97;
+        symbols = Array.from({ length: 26 }, (_, i) =>
+            String.fromCharCode(base + i)
+        );
+    }
+
+    if (window.currentLevel === 3) {
         symbols = Array.from({ length: 10 }, (_, i) => i.toString());
     }
 
-    if (currentLevel === 4) {
+    if (window.currentLevel === 4) {
         const text = document.getElementById('traceText').value || '';
         symbols = text.split('');
     }
 
     // Fill page with rows
-    for (let i = 0; i < 8; i++) {
+    for (let r = 0; r < 8; r++) {
         const row = document.createElement('div');
         row.className = 'tracing-row';
 
@@ -67,5 +66,5 @@ function generateTracing() {
     }
 }
 
-// Safety: make sure JS loaded
-console.log('Tracing JS loaded');
+// ----- DEBUG CONFIRMATION -----
+console.log('tracing.js loaded and generateTracing is global');
