@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Word Explorer - Kids Dictionary</title>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Chewy&family=Patrick+Hand&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --ocean-blue: #4A90E2;
+            --sunny-orange: #FF9F43;
+            --grass-green: #26DE81;
+            --berry-purple: #A55EEA;
+            --sky-light: #E3F2FD;
+            --cream: #FFF8E7;
+            --deep-blue: #2C3E50;
+            --warm-red: #EE5A6F;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Fredoka', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            animation: fadeInDown 0.6s ease-out;
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .header h1 {
+            font-family: 'Chewy', cursive;
+            font-size: 3.5rem;
+            color: white;
+            text-shadow: 3px 3px 0px var(--berry-purple),
+                         6px 6px 0px rgba(0, 0, 0, 0.1);
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.3rem;
+            color: var(--cream);
+            font-weight: 600;
+        }
+
+        .search-section {
+            background: white;
+            border-radius: 30px;
+            padding: 40px;
+            margin-bottom: 30px;
+            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.2);
+            animation: fadeIn 0.8s ease-out 0.2s backwards;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .search-box {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .search-input {
+            flex: 1;
+            padding: 18px 25px;
+            font-size: 1.3rem;
+            font-family: 'Fredoka', sans-serif;
+            border: 4px solid var(--ocean-blue);
+            border-radius: 20px;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .search-input:focus {
+            border-color: var(--berry-purple);
+            box-shadow: 0 0 20px rgba(165, 94, 234, 0.3);
+        }
+
+        .search-btn {
+            background: linear-gradient(135deg, var(--ocean-blue), var(--berry-purple));
+            color: white;
+            border: none;
+            border-radius: 20px;
+            padding: 18px 40px;
+            font-size: 1.2rem;
+            font-family: 'Fredoka', sans-serif;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .search-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .search-btn:active {
+            transform: translateY(-1px);
+        }
+
+        .api-setup {
+            background: var(--sky-light);
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 3px dashed var(--ocean-blue);
+        }
+
+        .api-setup h3 {
+            color: var(--deep-blue);
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+        }
+
+        .api-setup p {
+            color: var(--deep-blue);
+            font-size: 0.95rem;
+            line-height: 1.6;
+            margin-bottom: 10px;
+        }
+
+        .api-input-row {
+            display: flex;
+            gap: 10px;
+        }
+
+        .api-input {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid var(--ocean-blue);
+            border-radius: 10px;
+            font-family: 'Fredoka', sans-serif;
+        }
+
+        .api-save-btn {
+            background: var(--grass-green);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            padding: 12px 25px;
+            font-family: 'Fredoka', sans-serif;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .results-container {
+            background: white;
+            border-radius: 30px;
+            padding: 40px;
+            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.2);
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        .word-header {
+            border-bottom: 4px solid var(--ocean-blue);
+            padding-bottom: 25px;
+            margin-bottom: 30px;
+        }
+
+        .word-title {
+            font-family: 'Chewy', cursive;
+            font-size: 3rem;
+            color: var(--deep-blue);
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .word-type {
+            background: var(--sunny-orange);
+            color: white;
+            padding: 8px 20px;
+            border-radius: 15px;
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        .pronunciation-section {
+            background: var(--sky-light);
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 25px;
+        }
+
+        .pronunciation-text {
+            font-family: 'Patrick Hand', cursive;
+            font-size: 1.8rem;
+            color: var(--deep-blue);
+            margin-bottom: 15px;
+        }
+
+        .audio-btn {
+            background: var(--grass-green);
+            color: white;
+            border: none;
+            border-radius: 15px;
+            padding: 15px 30px;
+            font-size: 1.1rem;
+            font-family: 'Fredoka', sans-serif;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .audio-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .definitions-section {
+            margin-bottom: 30px;
+        }
+
+        .section-title {
+            font-family: 'Chewy', cursive;
+            font-size: 1.8rem;
+            color: var(--berry-purple);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .definition-item {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            border-radius: 20px;
+            padding: 25px;
+            margin-bottom: 20px;
+            border-left: 6px solid var(--ocean-blue);
+        }
+
+        .definition-text {
+            font-size: 1.3rem;
+            color: var(--deep-blue);
+            line-height: 1.8;
+            margin-bottom: 15px;
+        }
+
+        .examples-section {
+            background: var(--cream);
+            border-radius: 15px;
+            padding: 15px;
+            margin-top: 15px;
+        }
+
+        .example-label {
+            font-weight: 700;
+            color: var(--sunny-orange);
+            margin-bottom: 8px;
+            font-size: 1.1rem;
+        }
+
+        .example-text {
+            font-family: 'Patrick Hand', cursive;
+            font-size: 1.2rem;
+            color: var(--deep-blue);
+            line-height: 1.6;
+            margin-bottom: 8px;
+            padding-left: 15px;
+            border-left: 3px solid var(--sunny-orange);
+        }
+
+        .synonyms-section {
+            background: linear-gradient(135deg, #ffeaa7 0%, #fdcb6e 100%);
+            border-radius: 20px;
+            padding: 25px;
+            margin-bottom: 25px;
+        }
+
+        .synonym-tag {
+            background: white;
+            color: var(--deep-blue);
+            padding: 10px 20px;
+            border-radius: 15px;
+            display: inline-block;
+            margin: 5px;
+            font-weight: 600;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .loading {
+            text-align: center;
+            padding: 60px;
+            font-size: 1.5rem;
+            color: var(--deep-blue);
+        }
+
+        .spinner {
+            width: 60px;
+            height: 60px;
+            border: 6px solid var(--sky-light);
+            border-top-color: var(--ocean-blue);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .error-message {
+            background: linear-gradient(135deg, #ff7979 0%, #eb4d4b 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 20px;
+            text-align: center;
+            font-size: 1.2rem;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 80px 40px;
+            color: var(--deep-blue);
+        }
+
+        .empty-icon {
+            font-size: 5rem;
+            margin-bottom: 20px;
+        }
+
+        .empty-text {
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+        }
+
+        .empty-hint {
+            font-size: 1.1rem;
+            color: #666;
+        }
+
+        .inflections {
+            margin-top: 15px;
+            font-size: 1.1rem;
+            color: #555;
+        }
+
+        .inflection-label {
+            font-weight: 700;
+            color: var(--berry-purple);
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2.5rem;
+            }
+
+            .search-box {
+                flex-direction: column;
+            }
+
+            .word-title {
+                font-size: 2rem;
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useRef } = React;
+
+        function App() {
+            const [searchWord, setSearchWord] = useState('');
+            const [results, setResults] = useState(null);
+            const [loading, setLoading] = useState(false);
+            const [error, setError] = useState(null);
+            const [apiKey, setApiKey] = useState(localStorage.getItem('mw_dict_key') || '');
+            const [showApiSetup, setShowApiSetup] = useState(!localStorage.getItem('mw_dict_key'));
+            const audioRef = useRef(null);
+
+            const buildAudioUrl = (audioCode) => {
+                if (!audioCode) return null;
+                
+                // Determine subdirectory based on audio code rules
+                let subdirectory;
+                if (audioCode.startsWith('bix')) {
+                    subdirectory = 'bix';
+                } else if (audioCode.startsWith('gg')) {
+                    subdirectory = 'gg';
+                } else if (/^[0-9]/.test(audioCode)) {
+                    subdirectory = 'number';
+                } else {
+                    subdirectory = audioCode.charAt(0);
+                }
+                
+                return `https://media.merriam-webster.com/audio/prons/en/us/mp3/${subdirectory}/${audioCode}.mp3`;
+            };
+
+            const cleanDefinitionText = (text) => {
+                // Remove MW formatting codes
+                return text
+                    .replace(/\{bc\}/g, '')
+                    .replace(/\{it\}/g, '')
+                    .replace(/\{\/it\}/g, '')
+                    .replace(/\{wi\}/g, '')
+                    .replace(/\{\/wi\}/g, '')
+                    .replace(/\{inf\}/g, '')
+                    .replace(/\{\/inf\}/g, '')
+                    .replace(/\{sup\}/g, '')
+                    .replace(/\{\/sup\}/g, '')
+                    .replace(/\{ldquo\}/g, '"')
+                    .replace(/\{rdquo\}/g, '"')
+                    .replace(/\{a_link\|([^}]+)\}/g, '$1')
+                    .replace(/\{d_link\|([^|]+)\|[^}]+\}/g, '$1')
+                    .replace(/\{sx\|([^|]+)\|?\|?[^}]*\}/g, '$1');
+            };
+
+            const extractExamples = (definitionData) => {
+                const examples = [];
+                
+                if (definitionData.dt) {
+                    definitionData.dt.forEach(item => {
+                        if (item[0] === 'vis') {
+                            item[1].forEach(vis => {
+                                if (vis.t) {
+                                    examples.push(cleanDefinitionText(vis.t));
+                                }
+                            });
+                        }
+                    });
+                }
+                
+                return examples;
+            };
+
+            const searchDictionary = async () => {
+                if (!apiKey) {
+                    setError('Please enter your API key first!');
+                    setShowApiSetup(true);
+                    return;
+                }
+
+                if (!searchWord.trim()) {
+                    setError('Please enter a word to search!');
+                    return;
+                }
+
+                setLoading(true);
+                setError(null);
+                setResults(null);
+
+                try {
+                    // Use Elementary Dictionary (sd2) for kid-friendly content
+                    const url = `https://www.dictionaryapi.com/api/v3/references/sd2/json/${searchWord.toLowerCase().trim()}?key=${apiKey}`;
+                    const response = await fetch(url);
+                    
+                    if (!response.ok) {
+                        throw new Error('API request failed');
+                    }
+
+                    const data = await response.json();
+
+                    // Check if word was found
+                    if (Array.isArray(data) && typeof data[0] === 'string') {
+                        setError(`Word not found. Did you mean: ${data.slice(0, 5).join(', ')}?`);
+                        setLoading(false);
+                        return;
+                    }
+
+                    if (!data || !data[0]) {
+                        throw new Error('No results found');
+                    }
+
+                    const entry = data[0];
+                    
+                    // Extract all the information
+                    const wordData = {
+                        word: entry.hwi?.hw?.replace(/\*/g, '·') || searchWord,
+                        functionalLabel: entry.fl || '',
+                        pronunciations: entry.hwi?.prs || [],
+                        audioCode: entry.hwi?.prs?.[0]?.sound?.audio || null,
+                        definitions: [],
+                        inflections: entry.ins || [],
+                        shortdef: entry.shortdef || []
+                    };
+
+                    // Extract definitions with examples
+                    if (entry.def && entry.def[0] && entry.def[0].sseq) {
+                        entry.def[0].sseq.forEach(senseSeq => {
+                            senseSeq.forEach(sense => {
+                                if (sense[0] === 'sense') {
+                                    const senseData = sense[1];
+                                    const defText = senseData.dt?.[0]?.[1];
+                                    
+                                    if (defText) {
+                                        wordData.definitions.push({
+                                            text: cleanDefinitionText(defText),
+                                            examples: extractExamples(senseData)
+                                        });
+                                    }
+                                }
+                            });
+                        });
+                    }
+
+                    // If no detailed definitions, use shortdef
+                    if (wordData.definitions.length === 0 && wordData.shortdef.length > 0) {
+                        wordData.definitions = wordData.shortdef.map(def => ({
+                            text: cleanDefinitionText(def),
+                            examples: []
+                        }));
+                    }
+
+                    setResults(wordData);
+                } catch (err) {
+                    console.error('Search error:', err);
+                    setError('Something went wrong. Please check your API key and try again.');
+                } finally {
+                    setLoading(false);
+                }
+            };
+
+            const playAudio = () => {
+                if (results?.audioCode && audioRef.current) {
+                    const audioUrl = buildAudioUrl(results.audioCode);
+                    if (audioUrl) {
+                        audioRef.current.src = audioUrl;
+                        audioRef.current.play();
+                    }
+                }
+            };
+
+            const saveApiKey = () => {
+                if (apiKey.trim()) {
+                    localStorage.setItem('mw_dict_key', apiKey.trim());
+                    setShowApiSetup(false);
+                    alert('API key saved! You can now search for words.');
+                } else {
+                    alert('Please enter a valid API key');
+                }
+            };
+
+            const handleKeyPress = (e) => {
+                if (e.key === 'Enter') {
+                    searchDictionary();
+                }
+            };
+
+            return (
+                <div className="container">
+                    <div className="header">
+                        <h1>📖 Word Explorer</h1>
+                        <p>Discover Amazing Words!</p>
+                    </div>
+
+                    <div className="search-section">
+                        {showApiSetup && (
+                            <div className="api-setup">
+                                <h3>🔑 Setup Your Dictionary</h3>
+                                <p>Get your free API key from <a href="https://dictionaryapi.com/" target="_blank" rel="noopener">dictionaryapi.com</a> and select "Elementary Dictionary"</p>
+                                <div className="api-input-row">
+                                    <input
+                                        type="text"
+                                        className="api-input"
+                                        placeholder="Paste your API key here..."
+                                        value={apiKey}
+                                        onChange={(e) => setApiKey(e.target.value)}
+                                    />
+                                    <button className="api-save-btn" onClick={saveApiKey}>
+                                        Save
+                                    </button>
+                                </div>
+                                {apiKey && (
+                                    <p style={{ marginTop: '10px', fontSize: '0.9rem' }}>
+                                        <a href="#" onClick={(e) => { e.preventDefault(); setShowApiSetup(false); }}>
+                                            Hide setup
+                                        </a>
+                                    </p>
+                                )}
+                            </div>
+                        )}
+
+                        <div className="search-box">
+                            <input
+                                type="text"
+                                className="search-input"
+                                placeholder="Type a word to explore..."
+                                value={searchWord}
+                                onChange={(e) => setSearchWord(e.target.value)}
+                                onKeyPress={handleKeyPress}
+                            />
+                            <button className="search-btn" onClick={searchDictionary}>
+                                🔍 Search
+                            </button>
+                        </div>
+
+                        {!apiKey && (
+                            <p style={{ textAlign: 'center', color: '#666', fontSize: '0.95rem' }}>
+                                <a href="#" onClick={(e) => { e.preventDefault(); setShowApiSetup(true); }}>
+                                    Need to add your API key?
+                                </a>
+                            </p>
+                        )}
+                    </div>
+
+                    {loading && (
+                        <div className="results-container">
+                            <div className="loading">
+                                <div className="spinner"></div>
+                                <div>Searching for "{searchWord}"...</div>
+                            </div>
+                        </div>
+                    )}
+
+                    {error && (
+                        <div className="results-container">
+                            <div className="error-message">
+                                {error}
+                            </div>
+                        </div>
+                    )}
+
+                    {results && (
+                        <div className="results-container">
+                            <div className="word-header">
+                                <div className="word-title">
+                                    {results.word}
+                                    {results.functionalLabel && (
+                                        <span className="word-type">{results.functionalLabel}</span>
+                                    )}
+                                </div>
+
+                                {results.inflections.length > 0 && (
+                                    <div className="inflections">
+                                        <span className="inflection-label">Forms: </span>
+                                        {results.inflections.map((infl, idx) => (
+                                            <span key={idx}>
+                                                {infl.if || infl.ifc}
+                                                {idx < results.inflections.length - 1 ? ', ' : ''}
+                                            </span>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+
+                            {results.pronunciations.length > 0 && (
+                                <div className="pronunciation-section">
+                                    <div className="pronunciation-text">
+                                        🗣️ {results.pronunciations[0].mw || results.pronunciations[0].ipa || 'Pronunciation available'}
+                                    </div>
+                                    {results.audioCode && (
+                                        <button className="audio-btn" onClick={playAudio}>
+                                            🔊 Hear it pronounced!
+                                        </button>
+                                    )}
+                                </div>
+                            )}
+
+                            {results.definitions.length > 0 && (
+                                <div className="definitions-section">
+                                    <h2 className="section-title">📚 Meanings</h2>
+                                    {results.definitions.map((def, idx) => (
+                                        <div key={idx} className="definition-item">
+                                            <div className="definition-text">
+                                                <strong>{idx + 1}.</strong> {def.text}
+                                            </div>
+                                            {def.examples.length > 0 && (
+                                                <div className="examples-section">
+                                                    <div className="example-label">📝 Examples:</div>
+                                                    {def.examples.map((ex, exIdx) => (
+                                                        <div key={exIdx} className="example-text">
+                                                            "{ex}"
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            )}
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+
+                            <audio ref={audioRef} />
+                        </div>
+                    )}
+
+                    {!loading && !error && !results && (
+                        <div className="results-container">
+                            <div className="empty-state">
+                                <div className="empty-icon">🔍</div>
+                                <div className="empty-text">Ready to explore words?</div>
+                                <div className="empty-hint">Type a word above and click Search!</div>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        }
+
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+</body>
+</html>
