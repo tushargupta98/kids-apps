@@ -94,17 +94,81 @@
             display: flex;
             gap: 15px;
             margin-bottom: 20px;
+            position: relative;
+        }
+
+        .search-input-wrapper {
+            flex: 1;
+            position: relative;
         }
 
         .search-input {
-            flex: 1;
-            padding: 18px 25px;
+            width: 100%;
+            padding: 18px 120px 18px 25px;
             font-size: 1.3rem;
             font-family: 'Fredoka', sans-serif;
             border: 4px solid var(--ocean-blue);
             border-radius: 20px;
             outline: none;
             transition: all 0.3s ease;
+        }
+
+        .input-buttons {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            gap: 8px;
+        }
+
+        .clear-btn, .mic-btn {
+            background: transparent;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 50%;
+            width: 45px;
+            height: 45px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .clear-btn {
+            color: #999;
+        }
+
+        .clear-btn:hover {
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        .mic-btn {
+            color: var(--ocean-blue);
+        }
+
+        .mic-btn:hover {
+            background: var(--sky-light);
+        }
+
+        .mic-btn.listening {
+            background: var(--warm-red);
+            color: white;
+            animation: pulse-mic 1.5s infinite;
+        }
+
+        @keyframes pulse-mic {
+            0%, 100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+            50% {
+                transform: scale(1.1);
+                opacity: 0.8;
+            }
         }
 
         .search-input:focus {
@@ -371,6 +435,18 @@
             color: #666;
         }
 
+        .mic-status {
+            text-align: center;
+            margin-top: 10px;
+            font-size: 0.95rem;
+            color: var(--ocean-blue);
+            font-weight: 600;
+        }
+
+        .mic-status.error {
+            color: var(--warm-red);
+        }
+
         .inflections {
             margin-top: 15px;
             font-size: 1.1rem;
@@ -412,7 +488,10 @@
             const [error, setError] = useState(null);
             const [apiKey, setApiKey] = useState(localStorage.getItem('mw_dict_key') || '');
             const [showApiSetup, setShowApiSetup] = useState(!localStorage.getItem('mw_dict_key'));
+            const [isListening, setIsListening] = useState(false);
+            const [micStatus, setMicStatus] = useState('');
             const audioRef = useRef(null);
+            const recognitionRef = useRef(null);
 
             const buildAudioUrl = (audioCode) => {
                 if (!audioCode) return null;
@@ -582,6 +661,86 @@
                 }
             };
 
+            const clearSearch = () => {
+                setSearchWord('');
+                setResults(null);
+                setError(null);
+            };
+
+            const toggleVoiceInput = () => {
+                if (isListening) {
+                    stopListening();
+                } else {
+                    startListening();
+                }
+            };
+
+            const startListening = () => {
+                // Check if browser supports speech recognition
+                const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                
+                if (!SpeechRecognition) {
+                    setMicStatus('Speech recognition not supported in this browser');
+                    setTimeout(() => setMicStatus(''), 3000);
+                    return;
+                }
+
+                const recognition = new SpeechRecognition();
+                recognition.lang = 'en-US';
+                recognition.continuous = false;
+                recognition.interimResults = false;
+
+                recognition.onstart = () => {
+                    setIsListening(true);
+                    setMicStatus('🎤 Listening... Speak now!');
+                };
+
+                recognition.onresult = (event) => {
+                    const transcript = event.results[0][0].transcript;
+                    setSearchWord(transcript);
+                    setMicStatus(`✅ Heard: "${transcript}"`);
+                    setTimeout(() => setMicStatus(''), 2000);
+                };
+
+                recognition.onerror = (event) => {
+                    console.error('Speech recognition error:', event.error);
+                    setIsListening(false);
+                    
+                    let errorMessage = '❌ ';
+                    switch(event.error) {
+                        case 'no-speech':
+                            errorMessage += 'No speech detected. Try again!';
+                            break;
+                        case 'not-allowed':
+                            errorMessage += 'Microphone access denied. Please allow microphone access.';
+                            break;
+                        case 'network':
+                            errorMessage += 'Network error. Check your connection.';
+                            break;
+                        default:
+                            errorMessage += 'Error occurred. Please try again.';
+                    }
+                    
+                    setMicStatus(errorMessage);
+                    setTimeout(() => setMicStatus(''), 4000);
+                };
+
+                recognition.onend = () => {
+                    setIsListening(false);
+                };
+
+                recognitionRef.current = recognition;
+                recognition.start();
+            };
+
+            const stopListening = () => {
+                if (recognitionRef.current) {
+                    recognitionRef.current.stop();
+                    setIsListening(false);
+                    setMicStatus('');
+                }
+            };
+
             return (
                 <div className="container">
                     <div className="header">
@@ -617,18 +776,44 @@
                         )}
 
                         <div className="search-box">
-                            <input
-                                type="text"
-                                className="search-input"
-                                placeholder="Type a word to explore..."
-                                value={searchWord}
-                                onChange={(e) => setSearchWord(e.target.value)}
-                                onKeyPress={handleKeyPress}
-                            />
+                            <div className="search-input-wrapper">
+                                <input
+                                    type="text"
+                                    className="search-input"
+                                    placeholder="Type a word to explore..."
+                                    value={searchWord}
+                                    onChange={(e) => setSearchWord(e.target.value)}
+                                    onKeyPress={handleKeyPress}
+                                />
+                                <div className="input-buttons">
+                                    {searchWord && (
+                                        <button 
+                                            className="clear-btn" 
+                                            onClick={clearSearch}
+                                            title="Clear search"
+                                        >
+                                            ✕
+                                        </button>
+                                    )}
+                                    <button 
+                                        className={`mic-btn ${isListening ? 'listening' : ''}`}
+                                        onClick={toggleVoiceInput}
+                                        title={isListening ? "Stop listening" : "Speak to search"}
+                                    >
+                                        🎤
+                                    </button>
+                                </div>
+                            </div>
                             <button className="search-btn" onClick={searchDictionary}>
                                 🔍 Search
                             </button>
                         </div>
+
+                        {micStatus && (
+                            <div className={`mic-status ${micStatus.includes('❌') ? 'error' : ''}`}>
+                                {micStatus}
+                            </div>
+                        )}
 
                         {!apiKey && (
                             <p style={{ textAlign: 'center', color: '#666', fontSize: '0.95rem' }}>
