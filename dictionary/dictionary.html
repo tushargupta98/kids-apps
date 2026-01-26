@@ -921,9 +921,20 @@
 
                 recognition.onresult = (event) => {
                     const transcript = event.results[0][0].transcript;
-                    setSearchWord(transcript);
-                    setMicStatus(`✅ Heard: "${transcript}"`);
-                    setTimeout(() => setMicStatus(''), 2000);
+                    
+                    // Extract only the first word if multiple words were spoken
+                    const firstWord = transcript.trim().split(/\s+/)[0];
+                    
+                    setSearchWord(firstWord);
+                    
+                    // Show different messages based on what was captured
+                    if (transcript.trim().split(/\s+/).length > 1) {
+                        setMicStatus(`✅ Heard: "${transcript}" → Using first word: "${firstWord}"`);
+                    } else {
+                        setMicStatus(`✅ Heard: "${firstWord}"`);
+                    }
+                    
+                    setTimeout(() => setMicStatus(''), 3000);
                 };
 
                 recognition.onerror = (event) => {
